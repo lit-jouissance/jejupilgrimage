@@ -364,6 +364,20 @@
   .t-table .no{color:#cfd8dc;font-weight:900;}
   .setup-note{background:#fff5dc;border:2px solid var(--sand-deep);border-radius:16px;padding:16px;font-size:15px;line-height:1.7;color:#7a5a1e;}
   .setup-note code{background:#fff;border:1px solid var(--sand-deep);border-radius:6px;padding:1px 6px;font-size:13px;}
+
+  /* ---- 다른 성지 2열 그리드 ---- */
+  .more-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .more-card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 10px;cursor:pointer;text-align:center;}
+  .more-card:active{transform:scale(.97);}
+  .more-card .num{font-size:34px;}
+  .more-card b{display:block;font-size:15px;color:var(--sea-deep);margin-top:4px;line-height:1.3;min-height:38px;}
+  .more-card .ministamp{margin:8px auto 0;width:44px;height:44px;border-radius:50%;border:2px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:#b9a987;text-align:center;line-height:1.1;font-weight:700;}
+  .more-card .ministamp.done{border:2px solid var(--coral);color:var(--coral);font-size:22px;transform:rotate(-10deg);background:rgba(233,111,77,.08);}
+  /* ---- 나만의 순례 코스 ---- */
+  .course-drop{background:#eef2f0;border:none;border-radius:12px;color:#5a6b62;font-size:13px;font-weight:800;padding:8px 11px;cursor:pointer;font-family:inherit;margin-left:6px;}
+  .course-add{margin-left:auto;border:none;border-radius:12px;font-size:14px;font-weight:800;padding:9px 13px;cursor:pointer;font-family:inherit;background:var(--sea-deep);color:#fff;}
+  .course-add:disabled{background:#cfd8dc;color:#fff;}
 </style>
 </head>
 <body>
@@ -381,35 +395,74 @@
       </div>
     </div>
 
-    <button class="route-cta" onclick="go('route')">
-      <span class="ic">🗺️</span>
-      <div><b>오늘의 순례길</b><small id="routeSub">8월 8일 · 남원 → 세 성지 순서와 시간</small></div>
+    <button class="route-cta" style="background:linear-gradient(120deg,#2f7d4f,#3f9c63)" onclick="go('course')">
+      <span class="ic">🧭</span>
+      <div><b>나만의 순례 일정 짜기</b><small>가고 싶은 성지를 골라 순서대로</small></div>
       <span class="go">▶</span>
     </button>
 
-    <div class="section-label order-head">📕 도장을 모아요 — 3개를 채우면 끝!
-      <button id="orderToggle" class="order-toggle" onclick="toggleOrder()">↕ 순서 바꾸기</button>
+    <!-- 일정 확정 후: 순례 도장 -->
+    <div id="sec-stamp" style="display:none">
+      <div class="section-label order-head">📕 순례 도장 — <span id="stampCount">3</span>곳 모으기
+        <button id="orderToggle" class="order-toggle" onclick="toggleOrder()">↕ 순서 바꾸기</button>
+      </div>
+      <div id="site-list"></div>
+      <button class="route-cta" onclick="go('route')">
+        <span class="ic">🗺️</span>
+        <div><b>오늘의 순례길</b><small id="routeSub">8월 8일 · 남원 → 세 성지 순서와 시간</small></div>
+        <span class="go">▶</span>
+      </button>
     </div>
-    <div id="site-list"></div>
 
-    <div class="section-label">🚐 가는 길에 — 보너스 게임</div>
-    <div class="bonus" onclick="go('van')">
-      <div class="num">🚐</div>
-      <div><b>창밖 빙고</b><small>봉고차에서 제주 풍경을 찾아봐요</small></div>
+    <!-- 일정 확정 전: 제주도 성지 -->
+    <div id="sec-all" style="display:none">
+      <div class="section-label">🗺️ 제주도 성지</div>
+      <div id="allsites-list"></div>
     </div>
-    <div class="bonus" onclick="go('memory')">
-      <div class="num">🃏</div>
-      <div><b>순례 기억력 카드</b><small>같은 그림 짝을 찾아요</small></div>
-      <span class="seal" id="memory-seal"></span>
+
+    <!-- 일정 확정 후: 제주도 다른 성지 -->
+    <div id="sec-other" style="display:none">
+      <div class="section-label">🗺️ 제주도 다른 성지</div>
+      <div id="more-list"></div>
     </div>
-    <div class="bonus" onclick="go('match')">
-      <div class="num">🧩</div>
-      <div><b>누구의 이야기일까?</b><small>네 분을 업적과 연결해요</small></div>
-      <span class="seal" id="match-seal"></span>
+
+    <!-- 일정 확정 후: 순례 길 가는 길 -->
+    <div id="sec-bonus" style="display:none">
+      <div class="section-label">🚶 순례 길 — 가는 길에 틈틈이</div>
+      <div class="bonus" onclick="go('van')">
+        <div class="num">🚐</div>
+        <div><b>가는 길 ① 창밖 빙고</b><small>봉고차에서 제주 풍경을 찾아봐요</small></div>
+      </div>
+      <div class="bonus" onclick="go('memory')">
+        <div class="num">🃏</div>
+        <div><b>가는 길 ② 순례 기억력 카드</b><small>같은 그림 짝을 찾아요</small></div>
+        <span class="seal" id="memory-seal"></span>
+      </div>
+      <div class="bonus" onclick="go('match')">
+        <div class="num">🧩</div>
+        <div><b>가는 길 ③ 누구의 이야기일까?</b><small>순례한 성지의 인물을 맞혀요</small></div>
+        <span class="seal" id="match-seal"></span>
+      </div>
     </div>
 
     <button class="reset" onclick="openTeacher()">📋 순례 기록 보기 (선생님용)</button>
     <button class="reset" onclick="resetAll()">처음부터 다시 시작 (선생님용)</button>
+  </section>
+
+  <!-- ===================== 다른 성지 상세 ===================== -->
+  <section id="moredetail" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2 id="more-title">성지</h2></div>
+    <div id="more-body"></div>
+  </section>
+
+  <!-- ===================== 나만의 순례 코스 ===================== -->
+  <section id="course" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🧭 나만의 순례 코스</h2></div>
+    <div id="course-body"></div>
+  </section>
+  <section id="mycourse" class="screen">
+    <div class="topbar"><button class="back" onclick="go('course')">←</button><h2>📖 내 순례 코스</h2></div>
+    <div id="mycourse-body"></div>
   </section>
 
   <!-- ===================== 오늘의 길 ===================== -->
@@ -661,10 +714,11 @@
 <script>
 /* ---------------- state ---------------- */
 var KEY='pilgrim_v1';
-var state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10'};
+var state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false};
 try{var s=localStorage.getItem(KEY);if(s)state=Object.assign(state,JSON.parse(s));}catch(e){}
 (function(){var def=['yongsu','daejeong','hallim'];
-  if(!Array.isArray(state.order)||state.order.length!==3||def.some(function(k){return state.order.indexOf(k)<0;}))state.order=def.slice();})();
+  if(!Array.isArray(state.order)||state.order.length!==3||def.some(function(k){return state.order.indexOf(k)<0;}))state.order=def.slice();
+  if(!Array.isArray(state.myCourse)||!state.myCourse.length)state.myCourse=def.slice();})();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}cloudSave();}
 
 /* ============ 순례 기록 클라우드(Firebase) ============ */
@@ -713,6 +767,9 @@ function go(id){
   if(id==='daejeong_ox')renderOX('daejeong_ox',DAEJEONG_OX,'box-daejeong_ox');
   if(id==='hallim_journey')renderJourney();
   if(id==='route')renderRoute();
+  if(id==='home')layoutHome();
+  if(id==='course')renderCourse();
+  if(id==='mycourse')renderMyCourse();
   if(id==='memory')renderMemory();
   if(id==='match')renderMatch();
   if(id==='yongsu_bingo')renderBingo('box-yongsu_bingo',YONGSU_BINGO,'yongsu_bingo',true);
@@ -797,30 +854,35 @@ var SITE_META={
   hallim:{emoji:'🐑',name:'한림 임피제-임승필 사제 기념관',desc:'제주를 푸르게 바꾼 신부님'}
 };
 var orderMode=false;
+function siteDone(key){
+  return COURSE_META[key].type==='main'?siteComplete(key):!!state.done['more_'+key];
+}
 function renderSites(){
   var box=document.getElementById('site-list');if(!box)return;
+  var list=state.myCourse||[];
+  var cnt=document.getElementById('stampCount');if(cnt)cnt.textContent=list.length;
+  if(!list.length){box.innerHTML='<p class="bingo-hint">아직 순례 장소를 정하지 않았어요. 아래 ‘나만의 순례 코스 짜기’에서 골라 담아요.</p>';return;}
   var html='';
-  state.order.forEach(function(key,i){
-    var m=SITE_META[key];
+  list.forEach(function(key,i){
+    var m=COURSE_META[key];
+    var open=m.type==='main'?"go('"+key+"')":"openMore('"+key+"')";
     var ctrl=orderMode
       ? '<div class="reorder">'
-        +'<button onclick="moveSite(event,\''+key+'\',-1)" '+(i===0?'disabled':'')+'>▲</button>'
-        +'<button onclick="moveSite(event,\''+key+'\',1)" '+(i===state.order.length-1?'disabled':'')+'>▼</button></div>'
+        +'<button onclick="moveSiteC(event,'+i+',-1)" '+(i===0?'disabled':'')+'>▲</button>'
+        +'<button onclick="moveSiteC(event,'+i+',1)" '+(i===list.length-1?'disabled':'')+'>▼</button></div>'
       : '<div class="stamp" id="stamp-'+key+'">아직<br>안 찍음</div>';
-    html+='<div class="site" onclick="'+(orderMode?'':'go(\''+key+'\')')+'">'
+    html+='<div class="site" onclick="'+(orderMode?'':open)+'">'
       +'<div class="num">'+m.emoji+'</div>'
-      +'<div class="info"><b>'+m.name+'</b><small>'+m.desc+'</small></div>'
+      +'<div class="info"><b>'+m.title+'</b><small>'+m.desc+'</small></div>'
       +ctrl+'</div>';
   });
   box.innerHTML=html;
   if(!orderMode)refresh();
 }
-function moveSite(ev,key,dir){
+function moveSiteC(ev,i,dir){
   ev.stopPropagation();
-  var arr=state.order,i=arr.indexOf(key),j=i+dir;
-  if(j<0||j>=arr.length)return;
-  var t=arr[i];arr[i]=arr[j];arr[j]=t;
-  save();renderSites();
+  var a=state.myCourse,j=i+dir;if(j<0||j>=a.length)return;
+  var t=a[i];a[i]=a[j];a[j]=t;save();renderSites();
 }
 function toggleOrder(){
   orderMode=!orderMode;
@@ -830,13 +892,11 @@ function toggleOrder(){
 }
 
 function refresh(){
-  ['yongsu','daejeong','hallim'].forEach(function(site){
-    var st=document.getElementById('stamp-'+site);
-    if(!st)return;
-    if(siteComplete(site)){st.classList.add('done');st.innerHTML='✓';}
+  (state.myCourse||[]).forEach(function(key){
+    var st=document.getElementById('stamp-'+key);if(!st)return;
+    if(siteDone(key)){st.classList.add('done');st.innerHTML='✓';}
     else{st.classList.remove('done');st.innerHTML='아직<br>안 찍음';}
   });
-  // sub checkmarks
   setChk('chk-yongsu_ox',state.done.yongsu_ox);
   setChk('chk-yongsu_bingo',state.done.yongsu_bingo);
   setChk('chk-daejeong_ox',state.done.daejeong_ox);
@@ -846,14 +906,14 @@ function refresh(){
   setChk('chk-hallim_journey',state.done.hallim_journey);
   var ms=document.getElementById('memory-seal');if(ms)ms.textContent=state.done.memory?'⭐':'';
   var mt=document.getElementById('match-seal');if(mt)mt.textContent=state.done.match?'⭐':'';
-  // daejeong button
   var db=document.getElementById('daejeong-btn');
   if(db)db.disabled=!(state.missions[0]&&state.missions[1]&&state.missions[2]);
 }
 function setChk(id,on){var e=document.getElementById(id);if(e)e.textContent=on?'✓':'';}
 
 function checkAllDone(){
-  if(siteComplete('yongsu')&&siteComplete('daejeong')&&siteComplete('hallim')){
+  var sel=state.myCourse||[];
+  if(sel.length&&sel.every(function(k){return siteDone(k);})){
     setTimeout(function(){go('done');confetti();},500);
   }
 }
@@ -957,31 +1017,42 @@ function flipMem(idx){
 }
 
 /* ---------------- 보너스: 누구의 이야기일까 ---------------- */
-var PEOPLE=['김대건 신부님','정난주 마리아님','임피제 신부님','임승필 신부님'];
-var MATCH_Q=[
-  {clue:'라파엘호를 타고 제주 바닷가에 닿으신 분은?',a:0},
-  {clue:'양과 큰 목장으로 제주를 푸르게 바꾸신 분은?',a:2},
-  {clue:'성경을 우리말로 옮겨 “성서 늘보”라 불린 분은?',a:3},
-  {clue:'머나먼 제주에서 오래오래 믿음을 지키신 분은?',a:1},
-  {clue:'우리나라 첫 번째 한국인 신부님은?',a:0},
-  {clue:'바로 이 한림에서 태어난 신부님은?',a:3}
-];
-var matchIdx=0,matchScore=0;
-function renderMatch(){matchIdx=0;matchScore=0;drawMatch();}
+var PERSONS={
+  kdg:{name:'김대건 신부님',clues:['라파엘호를 타고 제주에 닿으신, 우리나라 첫 한국인 신부님은?']},
+  jnj:{name:'정난주 마리아님',clues:['머나먼 제주에서 오래오래 믿음을 지키신 분은?']},
+  ipj:{name:'임피제 신부님',clues:['양과 큰 목장으로 제주를 푸르게 바꾸신 신부님은?']},
+  isp:{name:'임승필 신부님',clues:['성경을 우리말로 옮겨 “성서 늘보”라 불린 신부님은?']},
+  giryang:{name:'김기량 펠릭스 베드로',clues:['풍랑에 표류했다가 돌아와 “제주의 첫 신자”가 되신 분은?']},
+  gyeonghan:{name:'황경한',clues:['정난주 마리아님의 아들로, 추자도에서 자란 분은?']},
+  taquet:{name:'에밀 타케 신부님',clues:['서귀포에서 제주의 꽃과 나무를 연구하고 귤나무를 가꾸신 신부님은?']}
+};
+var PERSON_BY_SITE={yongsu:['kdg'],daejeong:['jnj'],hallim:['ipj','isp'],saemi:['ipj'],giryang:['giryang'],gyeonghan:['gyeonghan'],hanon:['taquet']};
+var matchPeople=[],matchQ=[],matchIdx=0,matchScore=0;
+function buildMatch(){
+  var sel=state.myCourse||[],keys=[];
+  sel.forEach(function(s){(PERSON_BY_SITE[s]||[]).forEach(function(p){if(keys.indexOf(p)<0)keys.push(p);});});
+  if(keys.length<2)keys=Object.keys(PERSONS);        // 인물이 적으면 전체에서
+  matchPeople=keys.map(function(k){return PERSONS[k].name;});
+  matchQ=[];
+  keys.forEach(function(k,i){PERSONS[k].clues.forEach(function(c){matchQ.push({clue:c,a:i});});});
+  for(var j=matchQ.length-1;j>0;j--){var r=Math.floor(Math.random()*(j+1));var t=matchQ[j];matchQ[j]=matchQ[r];matchQ[r]=t;}
+  if(matchQ.length>6)matchQ=matchQ.slice(0,6);
+}
+function renderMatch(){buildMatch();matchIdx=0;matchScore=0;drawMatch();}
 function drawMatch(){
   var c=document.getElementById('box-match');
-  if(matchIdx>=MATCH_Q.length){
-    c.innerHTML='<div class="finish"><div class="big">🏅</div><h3>'+matchScore+' / '+MATCH_Q.length+' 맞혔어요!</h3>'
-      +'<p>네 분의 이야기를 잘 기억했어요.</p></div>'
+  if(matchIdx>=matchQ.length){
+    c.innerHTML='<div class="finish"><div class="big">🏅</div><h3>'+matchScore+' / '+matchQ.length+' 맞혔어요!</h3>'
+      +'<p>순례한 성지의 인물들을 잘 기억했어요.</p></div>'
       +'<button class="big-next gold" onclick="renderMatch()">다시 하기 🔁</button>'
       +'<button class="big-next" style="margin-top:10px" onclick="go(\'home\')">여권으로 돌아가기 📕</button>';
     if(!state.done.match){state.done.match=true;save();refresh();}
     return;
   }
-  var q=MATCH_Q[matchIdx];
-  var html='<div class="q-progress">'+(matchIdx+1)+' / '+MATCH_Q.length+'</div>'
+  var q=matchQ[matchIdx];
+  var html='<div class="q-progress">'+(matchIdx+1)+' / '+matchQ.length+'</div>'
     +'<div class="q-card">'+q.clue+'</div>';
-  PEOPLE.forEach(function(name,i){html+='<button class="choice" onclick="ansMatch(this,'+i+','+q.a+')">'+name+'</button>';});
+  matchPeople.forEach(function(name,i){html+='<button class="choice" onclick="ansMatch(this,'+i+','+q.a+')">'+name+'</button>';});
   html+='<div class="feedback" id="match-fb"></div>';
   c.innerHTML=html;
 }
@@ -991,7 +1062,7 @@ function ansMatch(btn,picked,correct){
   if(picked===correct){
     btn.classList.add('right');matchScore++;fb.className='feedback good';fb.textContent='정답이에요! 👏';
   }else{
-    btn.classList.add('wrong');fb.className='feedback soft';fb.textContent='정답은 “'+PEOPLE[correct]+'”이에요.';
+    btn.classList.add('wrong');fb.className='feedback soft';fb.textContent='정답은 “'+matchPeople[correct]+'”이에요.';
     var bs=document.querySelectorAll('#box-match .choice');bs[correct].classList.add('right');
   }
   var c=document.getElementById('box-match');
@@ -1028,6 +1099,7 @@ function answerOX(val){
 function finishOX(){
   if(oxKey.indexOf('yongsu')===0)go('yongsu');
   else if(oxKey.indexOf('daejeong')===0)go('daejeong');
+  else if(oxKey.indexOf('more_')===0)openMore(currentMore);
   else go('hallim');
   checkAllDone();
 }
@@ -1135,6 +1207,182 @@ function markDaejeong(){state.done.daejeong=true;save();confetti();go('home');ch
 /* ---------------- boat ---------------- */
 function markBoat(){state.done.boat=true;save();go('yongsu');}
 
+/* ---------------- 제주의 다른 성지 ---------------- */
+var MORE_SITES=[
+  {key:'giryang',emoji:'⚓',title:'김기량 순교기념관',sub:"제주의 첫 신자, '제주의 사도'",
+   story:'<strong>김기량(펠릭스 베드로)</strong>은 제주 함덕에서 태어난 뱃사람이에요. 배로 장사를 다니다 1857년 큰 풍랑을 만나 멀리 중국 앞바다까지 떠내려갔는데, 영국 배가 구해 주어 홍콩까지 가게 되었어요. 그곳에서 하느님을 알게 되어 세례를 받고, 제주로 돌아와 처음으로 이웃에게 믿음을 전한 <strong>‘제주의 첫 신자’</strong>가 되었지요. 뒷날 박해 때 끝까지 믿음을 지키다 순교하셨어요. 함덕 바닷가 가까이에 그를 기리는 기념관과 순례길(김기량길)이 있어요.',
+   info:'제주시 조천읍 일주동로 1216 · 관람 10시~17시(목요일 쉼)',search:'김기량 순교기념관',
+   prayerTitle:'김기량 펠릭스 베드로를 기리는 기도',
+   prayerText:'하느님,<br>넓은 바다에서 당신을 만난<br>김기량 펠릭스 베드로처럼<br>저희도 어디서나 당신을 알아보고<br>이웃에게 기쁜 소식을 전하게 하소서.',
+   ox:[{q:'김기량은 제주에서 처음으로 믿음을 가진 “제주의 첫 신자”예요.',a:true},
+       {q:'김기량은 함덕에서 태어난 뱃사람이었어요.',a:true},
+       {q:'김기량은 큰 풍랑을 만나 먼바다까지 떠내려간 적이 있어요.',a:true},
+       {q:'김기량은 제주가 아닌 외국에서 태어났어요.',a:false,no:'아니에요! 제주 함덕에서 태어났어요.'}]},
+  {key:'gyeonghan',emoji:'👶',title:'황경한 묘소 (추자도)',sub:'정난주 마리아님의 아들',
+   story:'<strong>황경한</strong>은 대정성지에 계신 <strong>정난주 마리아님의 아들</strong>이에요. 아기 때 어머니와 헤어져 추자도에서 자랐지요. 어머니는 아들만은 노비로 살지 않게 하려고 뱃사공에게 부탁해 섬에 살며시 내려놓았고, 마음씨 착한 오씨 집안이 아기를 거두어 길렀어요. 추자도에는 황경한의 묘가 있어, 어머니와 아들의 애틋한 사랑을 기억해요.',
+   info:'제주 추자도 예초리 (배를 타고 가요)',search:'황경한 묘소 추자도',
+   prayerTitle:'황경한을 기억하는 기도',
+   prayerText:'하느님,<br>어머니와 헤어진 어린 황경한을<br>지켜 주셨듯이,<br>외롭고 힘든 이들을<br>따뜻하게 돌봐 주소서.',
+   ox:[{q:'황경한은 정난주 마리아님의 아들이에요.',a:true},
+       {q:'황경한은 추자도에서 자랐어요.',a:true},
+       {q:'황경한은 아기 때 어머니와 헤어졌어요.',a:true},
+       {q:'황경한은 어머니와 평생 함께 살았어요.',a:false,no:'아니에요! 아기 때 헤어져 추자도에서 자랐어요.'}]},
+  {key:'saemi',emoji:'🌳',title:'새미 은총의 동산',sub:'예수님 이야기를 걸으며 묵상하는 곳',
+   story:'한림 <strong>이시돌</strong> 근처에 있는 넓은 기도 동산이에요. 제주를 도운 임피제 신부님의 이시돌과 이어진 곳이지요. <strong>예수님의 일생과 십자가의 길</strong>을 조각으로 만들어 두어, 천천히 걸으며 예수님 이야기를 하나씩 묵상할 수 있어요. 맑은 연못(새미)과 삼위일체 대성당도 있어, 걷다 보면 마음이 저절로 평화로워지는 곳이에요.',
+   info:'제주시 한림읍 금악리 (이시돌 근처)',search:'새미 은총의 동산',
+   prayerTitle:'새미 은총의 동산 기도',
+   prayerText:'하느님,<br>예수님께서 걸으신 길을 따라 걸으며<br>그 사랑을 배웁니다.<br>저희도 이웃을 섬기며<br>기쁘게 살게 하소서.',
+   ox:[{q:'새미 은총의 동산에서는 예수님의 일생을 조각으로 볼 수 있어요.',a:true},
+       {q:'천천히 걸으며 기도하고 묵상하는 동산이에요.',a:true},
+       {q:'제주를 도운 임피제 신부님의 이시돌과 이어진 곳이에요.',a:true},
+       {q:'이곳은 놀이기구를 타는 놀이공원이에요.',a:false,no:'아니에요! 걸으며 기도하는 조용한 동산이에요.'}]},
+  {key:'hwangsapyeong',emoji:'⛪',title:'황사평 성지',sub:'평화를 기도하는 묘역',
+   story:'오래전 제주에서 일어난 큰 갈등으로 목숨을 잃은 많은 분들이 이곳에 함께 잠들어 있어요. 제주 신자들이 그분들을 정성껏 모셔, 지금은 조용히 기도하며 <strong>평화</strong>를 비는 성지가 되었어요.',
+   info:'제주시 기와5길 117-22 · ☎064-721-0146',search:'황사평성지',
+   prayerTitle:'평화를 비는 기도',
+   prayerText:'하느님,<br>믿음을 지키다 목숨을 바친 분들을<br>기억합니다.<br>그분들에게 영원한 안식을,<br>저희에게는 서로 용서하는 평화를 주소서.',
+   ox:[{q:'황사평 성지는 많은 분들이 함께 잠들어 있는 묘역이에요.',a:true},
+       {q:'이곳은 조용히 기도하며 평화를 비는 성지예요.',a:true},
+       {q:'황사평 성지는 시끄럽게 뛰어노는 놀이터예요.',a:false,no:'아니에요! 조용히 기도하는 곳이에요.'}]},
+  {key:'gwandeok',emoji:'🏛️',title:'관덕정',sub:'제주 신앙 선조들을 기억하는 곳',
+   story:'관덕정은 제주 시내에 있는 아주 오래된 정자예요. 나라의 <strong>보물</strong>로 지정될 만큼 소중하지요. 오래전 제주에서 큰 갈등이 있었고, 그때 이 앞 넓은 마당에서 많은 이들이 목숨을 잃었어요. 지금은 그분들을 기억하고 평화를 기도하는 곳이에요.',
+   info:'제주시 삼도2동 · 보물 제322호',search:'관덕정 제주',
+   prayerTitle:'평화를 비는 기도',
+   prayerText:'하느님,<br>오래전 이곳에서 목숨을 잃은<br>모든 분을 기억합니다.<br>아픔을 씻어 주시고,<br>저희가 화해와 평화의 사람이 되게 하소서.',
+   ox:[{q:'관덕정은 제주 시내에 있는 아주 오래된 건물이에요.',a:true},
+       {q:'관덕정은 나라의 보물로 지정될 만큼 소중해요.',a:true},
+       {q:'관덕정은 놀이공원이에요.',a:false,no:'아니에요! 오래된 소중한 정자예요.'}]},
+  {key:'hanon',emoji:'🌋',title:'하논성당 순례지',sub:'서귀포 신앙이 시작된 곳',
+   story:'서귀포 <strong>하논</strong>은 한라산 남쪽(산남)에서 신앙이 처음 자리 잡은 곳이에요. 1900년 이곳에 성당이 세워졌는데, 지금은 그 <strong>터와 큰 은행나무</strong>가 남아 있어요. 하논은 화산이 만든 아주 넓은 <strong>분화구</strong>라 풍경도 특별하지요. 훗날 홍로성당을 거쳐 서귀포성당으로 이어지며, 서귀포 여러 성당의 <strong>뿌리</strong>가 된 곳이랍니다. 이 부근에서 활동하신 <strong>에밀 타케 신부님</strong>은 제주의 꽃과 나무를 사랑해 연구하고 귤나무를 가꾸신 분으로도 잘 알려져 있어요.',
+   info:'서귀포시 하논분화구 (서귀포성당에서 걷는 순례길)',search:'하논성당 터 서귀포',
+   prayerTitle:'하논성당 순례 기도',
+   prayerText:'하느님,<br>이 땅에 처음 신앙의 씨앗을<br>심어 주신 은혜에 감사드립니다.<br>저희 마음에도 그 믿음이<br>뿌리내려 자라게 하소서.',
+   ox:[{q:'하논성당은 한라산 남쪽(서귀포)에서 신앙이 시작된 곳이에요.',a:true},
+       {q:'지금 하논성당 터에는 큰 은행나무가 남아 있어요.',a:true},
+       {q:'하논은 화산이 만든 넓은 분화구예요.',a:true},
+       {q:'하논성당은 지금도 큰 건물이 그대로 남아 있어요.',a:false,no:'아니에요! 지금은 성당 터가 남아 있어요.'}]}
+];
+var currentMore=null;
+function moreFind(k){for(var i=0;i<MORE_SITES.length;i++)if(MORE_SITES[i].key===k)return MORE_SITES[i];}
+function renderGrid(id,keys){
+  var box=document.getElementById(id);if(!box)return;
+  var html='<div class="more-grid">';
+  keys.forEach(function(k){var m=COURSE_META[k];
+    var done=(m.type==='main'?siteComplete(k):state.done['more_'+k]);
+    var open=m.type==='main'?"go('"+k+"')":"openMore('"+k+"')";
+    var stamp=done?'<div class="ministamp done">✓</div>':'<div class="ministamp">미션<br>전</div>';
+    html+='<div class="more-card" onclick="'+open+'"><div class="num">'+m.emoji+'</div>'
+      +'<b>'+m.title+'</b>'+stamp+'</div>';
+  });
+  html+='</div>';box.innerHTML=html;
+}
+function renderMoreList(){
+  var sel=state.myCourse||[];
+  renderGrid('more-list',ALL_KEYS.filter(function(k){return sel.indexOf(k)<0;}));
+}
+function renderAllSites(){renderGrid('allsites-list',ALL_KEYS);}
+function layoutHome(){
+  var p=!!state.planned;
+  var ids={'sec-stamp':p,'sec-other':p,'sec-bonus':p,'sec-all':!p};
+  for(var id in ids){var el=document.getElementById(id);if(el)el.style.display=ids[id]?'block':'none';}
+  if(p){renderSites();renderMoreList();}else{renderAllSites();}
+}
+function openMore(key){
+  currentMore=key;var s=moreFind(key);
+  document.getElementById('more-title').textContent=s.emoji+' '+s.title;
+  var kakao='https://map.kakao.com/link/search/'+encodeURIComponent(s.search);
+  var done=state.done['more_'+key];
+  var body='<div class="intro-card"><span class="em">'+s.emoji+'</span>'+s.story+'</div>'
+    +'<div class="stop-card" style="margin-bottom:14px"><div class="note">📍 '+s.info+'</div>'
+    +'<div class="stop-actions"><a class="act nav" target="_blank" rel="noopener" href="'+kakao+'">길찾기</a></div></div>';
+  if(s.prayerText){
+    body+='<div class="pray-box"><h4>🙏 '+s.prayerTitle+'</h4>'+s.prayerText+'<span class="amen">아멘.</span></div>';
+  }
+  body+='<button class="menu-btn" onclick="startMoreQuiz()"><span class="ic">💡</span>'
+    +'<div class="t"><b>OX 퀴즈 미션</b><small>'+(done?'완료! 도장을 받았어요 🎖️':'다 풀면 도장이 찍혀요')+'</small></div>'
+    +'<span class="chk">'+(done?'✓':'')+'</span></button>';
+  document.getElementById('more-body').innerHTML=body;
+  go('moredetail');
+}
+function startMoreQuiz(){
+  var s=moreFind(currentMore);
+  document.getElementById('more-body').innerHTML='<div id="box-more"></div>';
+  renderOX('more_'+currentMore,s.ox,'box-more');
+}
+
+/* ---------------- 나만의 순례 코스 ---------------- */
+var COURSE_META={
+  yongsu:{emoji:'⛵',title:'용수성지',desc:'김대건 신부님이 배를 타고 닿은 곳',search:'용수성지 표착기념관',type:'main',
+    intro:'김대건 신부님이 배를 타고 닿은 곳이에요.',
+    prayerTitle:'성 김대건 안드레아 사제 기도문',
+    prayerText:'진리의 근원이신 하느님,<br>성 김대건 안드레아 사제가 당신 사랑에 응답하여<br>순교로 당신의 영광을 드러내게 하셨으니,<br>저희도 “용기를 내어라” 하신 말씀을 따라<br>담대히 그리스도를 증거하게 하소서.'},
+  daejeong:{emoji:'🌿',title:'대정성지',desc:'정난주 마리아님의 묘 · 조용히 기도',search:'대정성지 정난주',type:'main',
+    intro:'정난주 마리아님의 묘가 있는 조용한 곳이에요.',
+    prayerTitle:'정난주 마리아를 위한 기도문',
+    prayerText:'하느님, 정난주 마리아처럼<br>어려움 속에서도 믿음을 지키는 용기를 주시고,<br>이웃을 사랑하고 돕는 삶을 살게 하소서.<br>이 순례가 제 신앙을 돌아보는 시간이 되게 하소서.'},
+  hallim:{emoji:'🐑',title:'한림 임피제-임승필 사제 기념관',desc:'제주를 푸르게 바꾼 신부님',search:'한림성당',type:'main',
+    intro:'제주를 푸르게 바꾼 임피제 신부님과, 성경을 우리말로 옮긴 임승필 신부님을 기려요.',
+    prayerTitle:'두 신부님을 기리는 기도',
+    prayerText:'하느님, 이웃을 위해 평생을 바친<br>임피제·임승필 신부님처럼<br>저희도 가진 것을 나누고<br>말씀을 사랑하게 하소서.'},
+  giryang:{emoji:'⚓',title:'김기량 순교기념관',desc:'제주의 첫 신자, 제주의 사도',search:'김기량 순교기념관',type:'more'},
+  gyeonghan:{emoji:'👶',title:'황경한 묘소 (추자도)',desc:'정난주 마리아님의 아들',search:'황경한 묘소 추자도',type:'more'},
+  saemi:{emoji:'🌳',title:'새미 은총의 동산',desc:'예수님 이야기를 걸으며 묵상',search:'새미 은총의 동산',type:'more'},
+  hwangsapyeong:{emoji:'⛪',title:'황사평 성지',desc:'평화를 기도하는 묘역',search:'황사평성지',type:'more'},
+  gwandeok:{emoji:'🏛️',title:'관덕정',desc:'신앙 선조들을 기억하는 곳',search:'관덕정 제주',type:'more'},
+  hanon:{emoji:'🌋',title:'하논성당 순례지',desc:'서귀포 신앙이 시작된 곳',search:'하논성당 터 서귀포',type:'more'}
+};
+var ALL_KEYS=['yongsu','daejeong','hallim','giryang','gyeonghan','saemi','hwangsapyeong','gwandeok','hanon'];
+function courseMeta(k){
+  var m=COURSE_META[k];if(m.type!=='more')return m;
+  var s=moreFind(k);
+  return {emoji:m.emoji,title:m.title,search:m.search,type:'more',intro:s.story.replace(/<[^>]+>/g,''),prayerTitle:s.prayerTitle,prayerText:s.prayerText};
+}
+function renderCourse(){
+  var box=document.getElementById('course-body');if(!box)return;
+  var sel=state.myCourse||[];
+  var html='<p class="bingo-hint">가고 싶은 성지를 담고, 화살표로 순서를 정해요.</p>';
+  html+='<div class="section-label">내 코스 ('+sel.length+'곳)</div>';
+  if(!sel.length)html+='<p class="bingo-hint">아직 담은 성지가 없어요. 아래에서 골라 담아요.</p>';
+  sel.forEach(function(k,i){var m=COURSE_META[k];
+    html+='<div class="site"><div class="num">'+m.emoji+'</div><div class="info"><b>'+(i+1)+'. '+m.title+'</b></div>'
+      +'<div class="reorder"><button onclick="moveCourse('+i+',-1)" '+(i===0?'disabled':'')+'>▲</button>'
+      +'<button onclick="moveCourse('+i+',1)" '+(i===sel.length-1?'disabled':'')+'>▼</button></div>'
+      +'<button class="course-drop" onclick="dropCourse(\''+k+'\')">빼기</button></div>';
+  });
+  html+='<div class="section-label">성지 담기</div>';
+  ALL_KEYS.forEach(function(k){var m=COURSE_META[k];var inc=sel.indexOf(k)>=0;
+    html+='<div class="site" style="cursor:default"><div class="num">'+m.emoji+'</div><div class="info"><b>'+m.title+'</b></div>'
+      +'<button class="course-add" onclick="addCourse(\''+k+'\')" '+(inc?'disabled':'')+'>'+(inc?'담김 ✓':'＋ 담기')+'</button></div>';
+  });
+  if(sel.length){
+    html+='<button class="big-next" style="margin-top:14px" onclick="confirmPlan()">이 일정으로 정하기 ✓</button>';
+    html+='<button class="big-next gold" style="margin-top:10px" onclick="go(\'mycourse\')">내 순례 코스 보기 📖</button>';
+  }
+  box.innerHTML=html;
+}
+function confirmPlan(){state.planned=true;save();go('home');}
+function addCourse(k){var a=state.myCourse||(state.myCourse=[]);if(a.indexOf(k)<0)a.push(k);save();renderCourse();}
+function dropCourse(k){var a=state.myCourse||[];var i=a.indexOf(k);if(i>=0)a.splice(i,1);save();renderCourse();}
+function moveCourse(i,dir){var a=state.myCourse,j=i+dir;if(j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;save();renderCourse();}
+function renderMyCourse(){
+  var box=document.getElementById('mycourse-body');if(!box)return;
+  var sel=state.myCourse||[];
+  if(!sel.length){box.innerHTML='<p class="bingo-hint">담은 성지가 없어요. 먼저 코스를 짜 보세요.</p>';return;}
+  var html='<p class="route-day">내가 정한 순서대로 도는 순례 코스예요.</p>';
+  sel.forEach(function(k,i){var m=courseMeta(k);
+    var kakao='https://map.kakao.com/link/search/'+encodeURIComponent(m.search);
+    var line=(i<sel.length-1)?'<div class="line"></div>':'';
+    html+='<div class="stop"><div class="rail"><div class="dot">'+(i+1)+'</div>'+line+'</div>'
+      +'<div class="body"><div class="stop-card"><b>'+m.emoji+' '+m.title+'</b>'
+      +'<div class="note">'+m.intro+'</div>';
+    if(m.prayerText)html+='<div class="pray-box" style="margin:10px 0 0"><h4>🙏 '+m.prayerTitle+'</h4>'+m.prayerText+'<span class="amen">아멘.</span></div>';
+    html+='<div class="stop-actions"><a class="act nav" target="_blank" rel="noopener" href="'+kakao+'">길찾기</a>'
+      +'<button class="act" style="border:none;background:#eef2f7" onclick="'+(m.type==='more'?'openMore(\''+k+'\')':'go(\''+k+'\')')+'">자세히 보기</button>'
+      +'</div></div></div></div>';
+  });
+  box.innerHTML=html;
+}
+
 /* ---------------- 선생님 기록 보기 ---------------- */
 function openTeacher(){
   var pin=prompt('선생님 비밀번호를 입력하세요');
@@ -1204,7 +1452,7 @@ function confetti(){
 }
 function resetAll(){
   if(confirm('정말 처음부터 다시 시작할까요? 모든 도장이 사라져요.')){
-    state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10'};
+    state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false};
     bingoFound={};save();
     document.getElementById('nameInput').value='';
     document.querySelectorAll('.mission').forEach(function(m){m.classList.remove('on');});
@@ -1218,6 +1466,8 @@ ni.value=state.name||'';
 ni.addEventListener('input',function(){state.name=ni.value;save();});
 state.missions.forEach(function(v,i){if(v){var ms=document.querySelectorAll('#daejeong .mission')[i];if(ms)ms.classList.add('on');}});
 renderSites();
+renderMoreList();
+layoutHome();
 renderRoute();
 refresh();
 </script>
