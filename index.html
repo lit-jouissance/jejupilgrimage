@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>제주 서부권역 순례 여권</title>
+<title>제주 순례여권</title>
 <style>
   :root{
     --sea-deep:#163b5c;
@@ -92,12 +92,26 @@
     border:3px dashed var(--line);display:flex;align-items:center;justify-content:center;
     font-size:13px;color:#b9a987;text-align:center;line-height:1.1;font-weight:700;
   }
-  .stamp.done{
-    border:3px solid var(--coral);color:var(--coral);font-size:26px;
+  .stamp.done{color:var(--coral);font-size:26px;
+    border:3px solid var(--coral);
     transform:rotate(-12deg);background:rgba(233,111,77,.08);
     animation:pop .4s ease;
   }
   @keyframes pop{0%{transform:scale(0) rotate(0);}70%{transform:scale(1.25) rotate(-12deg);}100%{transform:scale(1) rotate(-12deg);}}
+  .order-head{display:flex;align-items:center;gap:8px;}
+  .order-toggle{
+    margin-left:auto;background:var(--card);border:2px solid var(--line);border-radius:14px;
+    font-size:13px;font-weight:800;color:var(--sea-deep);padding:6px 11px;cursor:pointer;font-family:inherit;
+  }
+  .order-toggle.on{background:var(--sea-deep);color:#fff;border-color:var(--sea-deep);}
+  .order-toggle:active{transform:scale(.96);}
+  .reorder{display:flex;flex-direction:column;gap:4px;margin-left:6px;}
+  .reorder button{
+    width:38px;height:30px;border:2px solid var(--line);background:#fff;border-radius:10px;
+    font-size:15px;font-weight:900;color:var(--sea-deep);cursor:pointer;font-family:inherit;line-height:1;
+  }
+  .reorder button:disabled{opacity:.3;}
+  .reorder button:active{transform:scale(.92);}
 
   .bonus{
     display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,#fff5dc,#ffe9c2);
@@ -298,6 +312,13 @@
   .route-cta small{font-size:14px;opacity:.9;}
   .route-cta .go{margin-left:auto;font-size:22px;}
   .route-day{font-size:15px;color:#7a8891;font-weight:700;margin:0 4px 16px;}
+  .trip-edit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:14px;}
+  .trip-now{font-size:17px;color:var(--sea-deep);}
+  .trip-now b{font-weight:800;}
+  .trip-form{display:none;width:100%;flex-direction:column;gap:10px;margin-top:6px;}
+  .trip-form label{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;}
+  .trip-form input{flex:1;font-family:inherit;font-size:16px;padding:10px;border:2px solid var(--line);border-radius:12px;background:#fff;}
+  .trip-form .big-next{margin-top:4px;}
   .stop{display:flex;gap:12px;}
   .stop .rail{display:flex;flex-direction:column;align-items:center;flex:0 0 36px;}
   .stop .dot{
@@ -352,8 +373,8 @@
   <section id="home" class="screen active">
     <div class="cover">
       <div class="boat">⛵</div>
-      <h1>제주 서부권역 순례 여권</h1>
-      <p>제주 서쪽 바닷가, 세 성지를 찾아가요</p>
+      <h1>제주 순례여권</h1>
+      <p>제주 신앙 선조들의 숨결과 발자취를 따라 믿음을 키워요</p>
       <div class="namebox">
         <span>이름</span>
         <input id="nameInput" placeholder="여기에 적어요" maxlength="8">
@@ -362,29 +383,14 @@
 
     <button class="route-cta" onclick="go('route')">
       <span class="ic">🗺️</span>
-      <div><b>오늘의 순례길</b><small>8월 8일 · 남원 → 세 성지 순서와 시간</small></div>
+      <div><b>오늘의 순례길</b><small id="routeSub">8월 8일 · 남원 → 세 성지 순서와 시간</small></div>
       <span class="go">▶</span>
     </button>
 
-    <div class="section-label">📕 도장을 모아요 — 3개를 채우면 끝!</div>
-
-    <div class="site" onclick="go('yongsu')">
-      <div class="num">⛵</div>
-      <div class="info"><b>용수성지</b><small>김대건 신부님이 배를 타고 닿은 곳</small></div>
-      <div class="stamp" id="stamp-yongsu">아직<br>안 찍음</div>
+    <div class="section-label order-head">📕 도장을 모아요 — 3개를 채우면 끝!
+      <button id="orderToggle" class="order-toggle" onclick="toggleOrder()">↕ 순서 바꾸기</button>
     </div>
-
-    <div class="site" onclick="go('daejeong')">
-      <div class="num">🌿</div>
-      <div class="info"><b>대정성지</b><small>정난주 마리아님의 묘 · 조용히 기도하는 곳</small></div>
-      <div class="stamp" id="stamp-daejeong">아직<br>안 찍음</div>
-    </div>
-
-    <div class="site" onclick="go('hallim')">
-      <div class="num">🐑</div>
-      <div class="info"><b>한림 임피제-임승필 사제 기념관</b><small>제주를 푸르게 바꾼 신부님</small></div>
-      <div class="stamp" id="stamp-hallim">아직<br>안 찍음</div>
-    </div>
+    <div id="site-list"></div>
 
     <div class="section-label">🚐 가는 길에 — 보너스 게임</div>
     <div class="bonus" onclick="go('van')">
@@ -409,86 +415,17 @@
   <!-- ===================== 오늘의 길 ===================== -->
   <section id="route" class="screen">
     <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🗺️ 오늘의 순례길</h2></div>
-    <p class="route-day">8월 8일 토요일 · 남원 출발 → 서부 성지 한 바퀴 (운전 약 3시간)</p>
-
-    <!-- 출발 -->
-    <div class="stop">
-      <div class="rail"><div class="dot">출</div><div class="line"></div></div>
-      <div class="body">
-        <span class="time-chip">오전 9:10 출발</span>
-        <div class="stop-card">
-          <b>남원 자비의 예수 성당</b>
-          <div class="note">물·모자·여분 간식을 챙겨 출발해요. 8월이라 더위 대비가 가장 중요합니다.</div>
-          <div class="stop-actions">
-            <a class="act" href="tel:0647641712">전화 064-764-1712</a>
-            <a class="act nav" target="_blank" rel="noopener" href="https://map.kakao.com/link/to/남원자비의예수성당,33.283265,126.7157415">길찾기</a>
-          </div>
-        </div>
+    <div class="trip-edit">
+      <div class="trip-now">📅 <b id="tripWhen">—</b></div>
+      <button class="order-toggle" onclick="editTrip()">✏️ 바꾸기</button>
+      <div id="tripForm" class="trip-form">
+        <label>날짜 <input type="date" id="tripDate"></label>
+        <label>출발 시각 <input type="time" id="tripTime"></label>
+        <button class="big-next" onclick="saveTrip()">저장</button>
       </div>
     </div>
-    <div class="drive">🚐 약 50~55분 (남쪽 해안로)</div>
-
-    <!-- 대정성지 -->
-    <div class="stop">
-      <div class="rail"><div class="dot">1</div><div class="line"></div></div>
-      <div class="body">
-        <span class="time-chip">오전 10:05 도착 · 35분</span>
-        <div class="stop-card">
-          <b>대정성지 (정난주 마리아 묘)</b>
-          <div class="note">진입로가 좁아 봉고차는 천천히! 주차장은 넓어요. 묘소라 뛰지 않고 조용히 묵상하는 곳이에요.</div>
-          <div class="stop-actions">
-            <a class="act nav" target="_blank" rel="noopener" href="https://map.kakao.com/link/to/대정성지정난주마리아묘,33.2541237,126.2611793">길찾기</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="drive">🚐 약 25~30분 (서쪽 해안로)</div>
-
-    <!-- 용수성지 -->
-    <div class="stop">
-      <div class="rail"><div class="dot">2</div><div class="line"></div></div>
-      <div class="body">
-        <span class="time-chip">오전 11:10 도착 · 60분</span>
-        <div class="stop-card">
-          <b>용수성지 · 성 김대건 신부 표착기념관</b>
-          <div class="note">복원된 라파엘호와 전망대가 있어 게임하기 좋아요. 월요일 빼고 오전 11시 순례 미사가 있고, 기념관은 9시~18시예요.</div>
-          <div class="stop-actions">
-            <a class="act" href="tel:0647721252">전화 064-772-1252</a>
-            <a class="act nav" target="_blank" rel="noopener" href="https://map.kakao.com/link/to/용수성지표착기념관,33.3228619,126.1677363">길찾기</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="lunch">🍚 점심 (약 12:20~13:20) · 고산 또는 한림 시내에서</div>
-
-    <!-- 한림 -->
-    <div class="stop">
-      <div class="rail"><div class="dot">3</div><div class="line"></div></div>
-      <div class="body">
-        <span class="time-chip">오후 1:30 도착 · 60분</span>
-        <div class="stop-card">
-          <b>한림 임피제·임승필 기념관 (한림성당)</b>
-          <div class="note">두 신부님을 기리는 곳이에요. 시간이 남으면 '임피제 기적의 길' 짧은 코스(무장애)도 걸을 수 있어요.</div>
-          <div class="stop-actions">
-            <a class="act" href="tel:0647964044">전화 064-796-4044</a>
-            <a class="act nav" target="_blank" rel="noopener" href="https://map.kakao.com/link/to/한림성당,33.4175625,126.2657801">길찾기</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="drive">🚐 약 70~80분 (남원으로 복귀)</div>
-
-    <!-- 도착 -->
-    <div class="stop end">
-      <div class="rail"><div class="dot">✓</div></div>
-      <div class="body">
-        <span class="time-chip">오후 4:00 무렵 도착</span>
-        <div class="stop-card">
-          <b>남원 도착 · 순례 마침</b>
-          <div class="note">길 위에서는 카카오내비·티맵으로 실시간 시간을 확인하세요. 모두 안전하게 다녀오길!</div>
-        </div>
-      </div>
-    </div>
+    <p class="route-day" id="routeDay">—</p>
+    <div id="route-timeline"></div>
     <div class="pray-card" style="margin-top:18px">
       <h3>🙏 순례 시작 기도</h3>
       <div class="by">출발 전에 다 함께</div>
@@ -724,20 +661,22 @@
 <script>
 /* ---------------- state ---------------- */
 var KEY='pilgrim_v1';
-var state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false]};
+var state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10'};
 try{var s=localStorage.getItem(KEY);if(s)state=Object.assign(state,JSON.parse(s));}catch(e){}
+(function(){var def=['yongsu','daejeong','hallim'];
+  if(!Array.isArray(state.order)||state.order.length!==3||def.some(function(k){return state.order.indexOf(k)<0;}))state.order=def.slice();})();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}cloudSave();}
 
 /* ============ 순례 기록 클라우드(Firebase) ============ */
 /* 사용하려면 아래 FIREBASE_CONFIG에 본인 프로젝트 설정을 붙여넣고,
    TEACHER_PIN을 원하는 숫자로 바꾸세요. 비워두면 이 기기 안에서만 저장됩니다. */
 var FIREBASE_CONFIG={
- apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
-    authDomain: "jeju-pilgrimage-653d9.firebaseapp.com",
-    projectId: "jeju-pilgrimage-653d9",
-    storageBucket: "jeju-pilgrimage-653d9.firebasestorage.app",
-    messagingSenderId: "861297947695",
-    appId: "1:861297947695:web:f52e64a53da2eda4be02da"
+  apiKey:"",
+  authDomain:"",
+  projectId:"",
+  storageBucket:"",
+  messagingSenderId:"",
+  appId:""
 };
 var TEACHER_PIN="1234";
 
@@ -773,6 +712,7 @@ function go(id){
   if(id==='hallim_ox')renderOX('hallim_ox',HALLIM_OX,'box-hallim_ox');
   if(id==='daejeong_ox')renderOX('daejeong_ox',DAEJEONG_OX,'box-daejeong_ox');
   if(id==='hallim_journey')renderJourney();
+  if(id==='route')renderRoute();
   if(id==='memory')renderMemory();
   if(id==='match')renderMatch();
   if(id==='yongsu_bingo')renderBingo('box-yongsu_bingo',YONGSU_BINGO,'yongsu_bingo',true);
@@ -787,9 +727,112 @@ function siteComplete(site){
   if(site==='daejeong')return state.done.daejeong;
   if(site==='hallim')return state.done.hallim_gift&&state.done.hallim_quote&&state.done.hallim_ox;
 }
+/* ---------------- 순례 일시 & 길 ---------------- */
+var ROUTE=[
+  {type:'stop',dot:'출',label:'출발',name:'남원 자비의 예수 성당',note:'물·모자·여분 간식을 챙겨 출발해요. 더운 날은 더위 대비가 가장 중요합니다.',tel:'0647641712',telLabel:'064-764-1712',map:'남원자비의예수성당',lat:33.283265,lng:126.7157415,stay:0},
+  {type:'drive',label:'약 55분 (남쪽 해안로)',min:55},
+  {type:'stop',dot:'1',name:'대정성지 (정난주 마리아 묘)',note:'진입로가 좁아 봉고차는 천천히! 주차장은 넓어요. 묘소라 뛰지 않고 조용히 묵상하는 곳이에요.',map:'대정성지정난주마리아묘',lat:33.2541237,lng:126.2611793,stay:35},
+  {type:'drive',label:'약 30분 (서쪽 해안로)',min:30},
+  {type:'stop',dot:'2',name:'용수성지 · 성 김대건 신부 표착기념관',note:'복원된 라파엘호와 전망대가 있어 게임하기 좋아요. 월요일 빼고 오전 11시 순례 미사가 있고, 기념관은 9시~18시예요.',tel:'0647721252',telLabel:'064-772-1252',map:'용수성지표착기념관',lat:33.3228619,lng:126.1677363,stay:60},
+  {type:'lunch',label:'점심 + 이동 (약 1시간 15분) · 고산 또는 한림 시내',min:75},
+  {type:'stop',dot:'3',name:'한림 임피제·임승필 기념관 (한림성당)',note:"두 신부님을 기리는 곳이에요. 시간이 남으면 '임피제 기적의 길' 짧은 코스(무장애)도 걸을 수 있어요.",tel:'0647964044',telLabel:'064-796-4044',map:'한림성당',lat:33.4175625,lng:126.2657801,stay:60},
+  {type:'drive',label:'약 1시간 15분 (남원으로 복귀)',min:75},
+  {type:'stop',dot:'✓',name:'남원 도착 · 순례 마침',note:'길 위에서는 카카오내비·티맵으로 실시간 시간을 확인하세요. 모두 안전하게 다녀오길!',end:true,stay:0}
+];
+function parseDepart(){var t=(state.departTime||'09:10').split(':');return new Date(2000,0,1,parseInt(t[0],10)||0,parseInt(t[1],10)||0);}
+function fmtTime(d){var h=d.getHours(),m=d.getMinutes(),ap=h<12?'오전':'오후',hh=h%12;if(hh===0)hh=12;return ap+' '+hh+':'+('0'+m).slice(-2);}
+function dateText(){
+  var p=(state.tripDate||'2026-08-08').split('-');
+  var d=new Date(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10));
+  var w=['일','월','화','수','목','금','토'][d.getDay()];
+  return (d.getMonth()+1)+'월 '+d.getDate()+'일 '+w+'요일';
+}
+function renderRoute(){
+  var box=document.getElementById('route-timeline');
+  if(box){
+    var cur=parseDepart(),html='';
+    ROUTE.forEach(function(it){
+      if(it.type==='drive'){html+='<div class="drive">🚐 '+it.label+'</div>';cur=new Date(cur.getTime()+it.min*60000);return;}
+      if(it.type==='lunch'){html+='<div class="lunch">🍚 '+it.label+'</div>';cur=new Date(cur.getTime()+it.min*60000);return;}
+      var arrive=new Date(cur.getTime()),chip;
+      if(it.label==='출발')chip=fmtTime(arrive)+' 출발';
+      else if(it.end)chip=fmtTime(arrive)+' 무렵 도착';
+      else chip=fmtTime(arrive)+' 도착'+(it.stay?' · '+it.stay+'분':'');
+      cur=new Date(cur.getTime()+(it.stay||0)*60000);
+      var act='';
+      if(it.tel)act+='<a class="act" href="tel:'+it.tel+'">전화 '+it.telLabel+'</a>';
+      if(it.map)act+='<a class="act nav" target="_blank" rel="noopener" href="https://map.kakao.com/link/to/'+it.map+','+it.lat+','+it.lng+'">길찾기</a>';
+      var line=it.end?'':'<div class="line"></div>';
+      html+='<div class="stop'+(it.end?' end':'')+'"><div class="rail"><div class="dot">'+it.dot+'</div>'+line+'</div>'
+        +'<div class="body"><span class="time-chip">'+chip+'</span>'
+        +'<div class="stop-card"><b>'+it.name+'</b><div class="note">'+it.note+'</div>'
+        +(act?'<div class="stop-actions">'+act+'</div>':'')+'</div></div></div>';
+    });
+    box.innerHTML=html;
+  }
+  var dt=dateText(),tm=fmtTime(parseDepart());
+  var rd=document.getElementById('routeDay');if(rd)rd.textContent=dt+' · 남원 출발 → 서부 성지 한 바퀴 (운전 약 3시간)';
+  var tw=document.getElementById('tripWhen');if(tw)tw.textContent=dt+' · '+tm+' 출발';
+  var rs=document.getElementById('routeSub');if(rs)rs.textContent=dt.replace(/ .요일$/,'')+' · 남원 → 세 성지 순서와 시간';
+}
+function editTrip(){
+  var f=document.getElementById('tripForm');
+  var open=getComputedStyle(f).display==='none';
+  if(open){document.getElementById('tripDate').value=state.tripDate||'2026-08-08';document.getElementById('tripTime').value=state.departTime||'09:10';}
+  f.style.display=open?'flex':'none';
+}
+function saveTrip(){
+  var d=document.getElementById('tripDate').value,t=document.getElementById('tripTime').value;
+  if(d)state.tripDate=d;
+  if(t)state.departTime=t;
+  save();
+  document.getElementById('tripForm').style.display='none';
+  renderRoute();
+}
+
+/* ---------------- 순례지 순서 ---------------- */
+var SITE_META={
+  yongsu:{emoji:'⛵',name:'용수성지',desc:'김대건 신부님이 배를 타고 닿은 곳'},
+  daejeong:{emoji:'🌿',name:'대정성지',desc:'정난주 마리아님의 묘 · 조용히 기도하는 곳'},
+  hallim:{emoji:'🐑',name:'한림 임피제-임승필 사제 기념관',desc:'제주를 푸르게 바꾼 신부님'}
+};
+var orderMode=false;
+function renderSites(){
+  var box=document.getElementById('site-list');if(!box)return;
+  var html='';
+  state.order.forEach(function(key,i){
+    var m=SITE_META[key];
+    var ctrl=orderMode
+      ? '<div class="reorder">'
+        +'<button onclick="moveSite(event,\''+key+'\',-1)" '+(i===0?'disabled':'')+'>▲</button>'
+        +'<button onclick="moveSite(event,\''+key+'\',1)" '+(i===state.order.length-1?'disabled':'')+'>▼</button></div>'
+      : '<div class="stamp" id="stamp-'+key+'">아직<br>안 찍음</div>';
+    html+='<div class="site" onclick="'+(orderMode?'':'go(\''+key+'\')')+'">'
+      +'<div class="num">'+m.emoji+'</div>'
+      +'<div class="info"><b>'+m.name+'</b><small>'+m.desc+'</small></div>'
+      +ctrl+'</div>';
+  });
+  box.innerHTML=html;
+  if(!orderMode)refresh();
+}
+function moveSite(ev,key,dir){
+  ev.stopPropagation();
+  var arr=state.order,i=arr.indexOf(key),j=i+dir;
+  if(j<0||j>=arr.length)return;
+  var t=arr[i];arr[i]=arr[j];arr[j]=t;
+  save();renderSites();
+}
+function toggleOrder(){
+  orderMode=!orderMode;
+  var btn=document.getElementById('orderToggle');
+  if(btn){btn.classList.toggle('on',orderMode);btn.textContent=orderMode?'✓ 순서 완료':'↕ 순서 바꾸기';}
+  renderSites();
+}
+
 function refresh(){
   ['yongsu','daejeong','hallim'].forEach(function(site){
     var st=document.getElementById('stamp-'+site);
+    if(!st)return;
     if(siteComplete(site)){st.classList.add('done');st.innerHTML='✓';}
     else{st.classList.remove('done');st.innerHTML='아직<br>안 찍음';}
   });
@@ -1161,7 +1204,7 @@ function confetti(){
 }
 function resetAll(){
   if(confirm('정말 처음부터 다시 시작할까요? 모든 도장이 사라져요.')){
-    state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false]};
+    state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10'};
     bingoFound={};save();
     document.getElementById('nameInput').value='';
     document.querySelectorAll('.mission').forEach(function(m){m.classList.remove('on');});
@@ -1174,6 +1217,8 @@ var ni=document.getElementById('nameInput');
 ni.value=state.name||'';
 ni.addEventListener('input',function(){state.name=ni.value;save();});
 state.missions.forEach(function(v,i){if(v){var ms=document.querySelectorAll('#daejeong .mission')[i];if(ms)ms.classList.add('on');}});
+renderSites();
+renderRoute();
 refresh();
 </script>
 </body>
