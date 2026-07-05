@@ -378,9 +378,31 @@
   .course-drop{background:#eef2f0;border:none;border-radius:12px;color:#5a6b62;font-size:13px;font-weight:800;padding:8px 11px;cursor:pointer;font-family:inherit;margin-left:6px;}
   .course-add{margin-left:auto;border:none;border-radius:12px;font-size:14px;font-weight:800;padding:9px 13px;cursor:pointer;font-family:inherit;background:var(--sea-deep);color:#fff;}
   .course-add:disabled{background:#cfd8dc;color:#fff;}
+
+  /* ---- 대문(스플래시) ---- */
+  #splash{position:fixed;inset:0;z-index:1000;background:#163b5c;color:#fff;
+    display:flex;align-items:center;justify-content:center;padding:34px;}
+  .splash-inner{max-width:560px;text-align:center;animation:fade .5s ease;}
+  .splash-mark{font-size:44px;opacity:.85;margin-bottom:22px;}
+  .splash-quote{font-size:26px;font-weight:800;line-height:1.55;letter-spacing:-.5px;word-break:keep-all;}
+  .splash-by{font-size:16px;opacity:.75;margin-top:18px;font-weight:700;}
+  .splash-btn{margin-top:38px;background:#fff;color:#163b5c;border:none;border-radius:18px;
+    font-family:inherit;font-size:19px;font-weight:800;padding:16px 30px;cursor:pointer;}
+  .splash-btn:active{transform:scale(.97);}
 </style>
 </head>
 <body>
+
+<!-- ===================== 대문 ===================== -->
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-mark">✝️</div>
+    <div class="splash-quote" id="splashQuote">…</div>
+    <div class="splash-by" id="splashBy"></div>
+    <button class="splash-btn" onclick="enterApp()">순례 시작하기 →</button>
+  </div>
+</div>
+
 <div class="wrap">
 
   <!-- ===================== HOME ===================== -->
@@ -445,8 +467,8 @@
       </div>
     </div>
 
-    <button class="reset" onclick="openTeacher()">📋 순례 기록 보기 (관리자)</button>
-    <button class="reset" onclick="resetAll()">처음부터 다시 시작 (관리자)</button>
+    <button class="reset" onclick="openTeacher()">📋 순례 기록 보기 (선생님용)</button>
+    <button class="reset" onclick="resetAll()">처음부터 다시 시작 (선생님용)</button>
   </section>
 
   <!-- ===================== 다른 성지 상세 ===================== -->
@@ -725,14 +747,14 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}c
 /* 사용하려면 아래 FIREBASE_CONFIG에 본인 프로젝트 설정을 붙여넣고,
    TEACHER_PIN을 원하는 숫자로 바꾸세요. 비워두면 이 기기 안에서만 저장됩니다. */
 var FIREBASE_CONFIG={
- apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
-  authDomain: "jeju-pilgrimage-653d9.firebaseapp.com",
-  projectId: "jeju-pilgrimage-653d9",
-  storageBucket: "jeju-pilgrimage-653d9.firebasestorage.app",
-  messagingSenderId: "861297947695",
-  appId: "1:861297947695:web:f52e64a53da2eda4be02da"
+  apiKey:"",
+  authDomain:"",
+  projectId:"",
+  storageBucket:"",
+  messagingSenderId:"",
+  appId:""
 };
-var TEACHER_PIN="1360";
+var TEACHER_PIN="1234";
 
 var cloudDb=null;
 function initCloud(){
@@ -1461,6 +1483,27 @@ function resetAll(){
 }
 
 /* ---------------- init ---------------- */
+var SAINT_QUOTES=[
+  {t:'행복합니다, 마음속으로 순례의 길을 생각할 때 당신께 힘을 얻는 사람들!',by:'시편 84,6'},
+  {t:'환난은 인내를 자아내고 인내는 수양을, 수양은 희망을 자아냅니다. 그리고 희망은 우리를 부끄럽게 하지 않습니다.',by:'로마 5,3-5'},
+  {t:'저는 이 땅에서 이방인일 뿐, 제게서 당신 계명을 감추지 마소서.',by:'시편 119,19'},
+  {t:'우리는 아직 고정된 거처가 없는 길 위의 나그네입니다.',by:'성 아우구스티노'},
+  {t:'나의 영혼은 오직 하느님만을 향해 걷는 순례자입니다.',by:'성 이냐시오 데 로욜라'},
+  {t:'하늘로 가는 그 모든 길이, 이미 하늘입니다.',by:'시에나의 성녀 가타리나'},
+  {t:'인생은 낯선 여관에서 보내는 하룻밤과 같습니다.',by:'아빌라의 성녀 데레사'},
+  {t:'이 세상에서 우리는 나그네이며 순례자입니다.',by:'토마스 아 켐피스'},
+  {t:'믿는 이는 이 세상을 지나가는 순례자입니다.',by:'성 요한 바오로 2세'},
+  {t:'용기를 내어라.',by:'성 김대건 안드레아'}
+];
+function showSplash(){
+  var q=SAINT_QUOTES[Math.floor(Math.random()*SAINT_QUOTES.length)];
+  var qt=document.getElementById('splashQuote'),by=document.getElementById('splashBy');
+  if(qt)qt.textContent='“'+q.t+'”';
+  if(by)by.textContent='— '+q.by;
+}
+function enterApp(){var s=document.getElementById('splash');if(s)s.style.display='none';}
+showSplash();
+
 var ni=document.getElementById('nameInput');
 ni.value=state.name||'';
 ni.addEventListener('input',function(){state.name=ni.value;save();});
