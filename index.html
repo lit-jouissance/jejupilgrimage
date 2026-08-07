@@ -423,6 +423,12 @@
       <span class="go">▶</span>
     </button>
 
+    <button class="route-cta" style="background:linear-gradient(120deg,#b3562f,#e0834a)" onclick="go('troop')">
+      <span class="ic">🔔</span>
+      <div><b>순례단 · 알림</b><small>순례단을 만들거나 들어가 알림을 받아요</small></div>
+      <span class="go">▶</span>
+    </button>
+
     <!-- 일정 확정 후: 순례 도장 -->
     <div id="sec-stamp" style="display:none">
       <div class="section-label order-head">📕 순례 도장 — <span id="stampCount">3</span>곳 모으기
@@ -485,6 +491,12 @@
   <section id="mycourse" class="screen">
     <div class="topbar"><button class="back" onclick="go('course')">←</button><h2>📖 내 순례 코스</h2></div>
     <div id="mycourse-body"></div>
+  </section>
+
+  <!-- ===================== 순례단 · 알림 ===================== -->
+  <section id="troop" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🔔 순례단 · 알림</h2></div>
+    <div id="troop-body"></div>
   </section>
 
   <!-- ===================== 오늘의 길 ===================== -->
@@ -732,11 +744,12 @@
 <!-- 순례 기록 클라우드 저장(선택): Firebase. 인터넷이 있을 때만 동기화돼요. -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging-compat.js"></script>
 
 <script>
 /* ---------------- state ---------------- */
 var KEY='pilgrim_v1';
-var state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false};
+var state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
 try{var s=localStorage.getItem(KEY);if(s)state=Object.assign(state,JSON.parse(s));}catch(e){}
 (function(){var def=['yongsu','daejeong','hallim'];
   if(!Array.isArray(state.order)||state.order.length!==3||def.some(function(k){return state.order.indexOf(k)<0;}))state.order=def.slice();
@@ -747,14 +760,16 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}c
 /* 사용하려면 아래 FIREBASE_CONFIG에 본인 프로젝트 설정을 붙여넣고,
    TEACHER_PIN을 원하는 숫자로 바꾸세요. 비워두면 이 기기 안에서만 저장됩니다. */
 var FIREBASE_CONFIG={
-  apiKey:"",
-  authDomain:"",
-  projectId:"",
-  storageBucket:"",
-  messagingSenderId:"",
-  appId:""
+ apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
+  authDomain: "jeju-pilgrimage-653d9.firebaseapp.com",
+  projectId: "jeju-pilgrimage-653d9",
+  storageBucket: "jeju-pilgrimage-653d9.firebasestorage.app",
+  messagingSenderId: "861297947695",
+  appId: "1:861297947695:web:f52e64a53da2eda4be02da"
 };
 var TEACHER_PIN="1234";
+// 순례 알림(FCM)용 웹푸시 인증서 키: Firebase 콘솔 → 프로젝트 설정 → 클라우드 메시징 → 웹 푸시 인증서
+var VAPID_KEY="BNxEqMBg6Tz0MKFfifnZL4cFHcTbBUsn1XMBXzSzfOjPvvi9_0iRDgDj2QBkvMO9hyo2eYmxTKDWoUxtolB2Ioc";
 
 var cloudDb=null;
 function initCloud(){
@@ -792,6 +807,7 @@ function go(id){
   if(id==='home')layoutHome();
   if(id==='course')renderCourse();
   if(id==='mycourse')renderMyCourse();
+  if(id==='troop')renderTroop();
   if(id==='memory')renderMemory();
   if(id==='match')renderMatch();
   if(id==='yongsu_bingo')renderBingo('box-yongsu_bingo',YONGSU_BINGO,'yongsu_bingo',true);
@@ -1383,6 +1399,140 @@ function renderCourse(){
   box.innerHTML=html;
 }
 function confirmPlan(){state.planned=true;save();go('home');}
+
+/* ---------------- 순례단 · 알림 (FCM) ---------------- */
+var leaderPw='';
+function api(path,data,method){
+  return fetch(path,{method:method||'POST',headers:{'Content-Type':'application/json'},
+    body:data?JSON.stringify(data):undefined}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});});
+}
+function renderTroop(){
+  var box=document.getElementById('troop-body');
+  var here=state.troopName?('<div class="stop-card" style="margin-bottom:14px"><b>🔔 '+state.troopName+'</b><div class="note">이 순례단의 알림을 받도록 되어 있어요.</div></div>'):'';
+  box.innerHTML=here
+    +'<button class="menu-btn" onclick="troopJoin()"><span class="ic">🙋</span><div class="t"><b>순례단 들어가기</b><small>이미 있는 순례단을 골라 알림 받기</small></div></button>'
+    +'<button class="menu-btn" onclick="troopCreate()"><span class="ic">➕</span><div class="t"><b>순례단 만들기</b><small>단장이 새 순례단을 개설해요</small></div></button>'
+    +'<button class="menu-btn" onclick="troopLeader()"><span class="ic">🔑</span><div class="t"><b>단장 로그인</b><small>기간 설정·알림 발송 (비번 필요)</small></div></button>'
+    +'<p class="bingo-hint">알림을 받으려면 Firebase 설정(FIREBASE_CONFIG·VAPID_KEY)과 서비스워커가 필요해요. 아이폰은 홈 화면에 앱을 추가한 상태에서만 알림이 와요.</p>';
+}
+function troopCreate(){
+  var box=document.getElementById('troop-body');
+  box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>➕ 순례단 만들기</h2></div>'
+    +'<div class="trip-form" style="display:flex"><label>순례단 이름 <input id="tCreateName" placeholder="예: 남원 순례단"></label>'
+    +'<button class="big-next" onclick="doCreate()">개설하기</button></div><div class="feedback" id="tMsg"></div>';
+}
+function doCreate(){
+  var name=document.getElementById('tCreateName').value.trim();
+  if(!name)return;
+  document.getElementById('tMsg').textContent='개설 중...';
+  api('/api/create',{name:name}).then(function(r){
+    if(!r.ok){document.getElementById('tMsg').textContent=r.j.error||'실패했어요';return;}
+    state.troopId=r.j.id;state.troopName=r.j.fullName;save();
+    var box=document.getElementById('troop-body');
+    box.innerHTML='<div class="stop-card"><b>✅ '+r.j.fullName+' 개설 완료</b>'
+      +'<div class="note">단원들에게 이 이름(<b>'+r.j.fullName+'</b>)을 알려주면 스스로 들어올 수 있어요.<br><br>'
+      +'단장 비밀번호는 처음에 <b>0000</b>이에요. ‘단장 로그인’ 후 꼭 바꿔주세요.</div></div>'
+      +'<button class="big-next gold" onclick="renderTroop()">확인</button>';
+  }).catch(function(){document.getElementById('tMsg').textContent='연결에 실패했어요';});
+}
+function troopJoin(){
+  var box=document.getElementById('troop-body');
+  box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🙋 순례단 들어가기</h2></div><p class="bingo-hint">목록을 불러오는 중...</p>';
+  api('/api/list',null,'GET').then(function(r){
+    var items=(r.j&&r.j.items)||[];
+    var html='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🙋 순례단 들어가기</h2></div>';
+    if(!items.length)html+='<p class="bingo-hint">아직 개설된 순례단이 없어요.</p>';
+    items.forEach(function(it){
+      html+='<button class="menu-btn" onclick="doJoin(\''+it.id+'\',\''+it.fullName.replace(/'/g,"")+'\')">'
+        +'<span class="ic">⛪</span><div class="t"><b>'+it.fullName+'</b><small>이 순례단 알림 받기</small></div></button>';
+    });
+    html+='<div class="feedback" id="tMsg"></div>';
+    document.getElementById('troop-body').innerHTML=html;
+  }).catch(function(){document.getElementById('troop-body').innerHTML='<p class="bingo-hint">목록을 불러오지 못했어요.</p>';});
+}
+function doJoin(id,fullName){
+  enableAlerts(id).then(function(ok){
+    if(ok){state.troopId=id;state.troopName=fullName;save();
+      var m=document.getElementById('tMsg');if(m){m.className='feedback good';m.textContent='알림을 받도록 설정됐어요! 🔔';}}
+  });
+}
+function enableAlerts(id){
+  if(!('serviceWorker' in navigator)||typeof firebase==='undefined'){alert('이 기기/브라우저는 알림을 지원하지 않아요.');return Promise.resolve(false);}
+  if(!initCloud()){alert('먼저 FIREBASE_CONFIG 설정이 필요해요.');return Promise.resolve(false);}
+  return navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function(reg){
+    return Notification.requestPermission().then(function(p){
+      if(p!=='granted'){alert('알림이 허용되지 않았어요.');return false;}
+      return firebase.messaging().getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg}).then(function(token){
+        return api('/api/join',{id:id,token:token}).then(function(r){
+          if(!r.ok){alert(r.j.error||'구독 실패');return false;}
+          return true;
+        });
+      });
+    });
+  }).catch(function(e){alert('알림 설정 실패: '+e.message);return false;});
+}
+function troopLeader(){
+  var box=document.getElementById('troop-body');
+  box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🔑 단장 로그인</h2></div>'
+    +'<div class="trip-form" style="display:flex">'
+    +'<label>순례단 코드 <input id="tLid" placeholder="예: AB12" value="'+(state.troopId||'')+'"></label>'
+    +'<label>비밀번호 <input id="tLpw" type="password" placeholder="처음엔 0000"></label>'
+    +'<button class="big-next" onclick="doLeaderLogin()">로그인</button></div><div class="feedback" id="tMsg"></div>';
+}
+function doLeaderLogin(){
+  var id=document.getElementById('tLid').value.trim().toUpperCase();
+  var pw=document.getElementById('tLpw').value;
+  document.getElementById('tMsg').textContent='확인 중...';
+  api('/api/leader-login',{id:id,pw:pw}).then(function(r){
+    if(!r.ok){document.getElementById('tMsg').textContent=r.j.error||'실패';return;}
+    leaderPw=pw;state.troopId=id;state.troopName=r.j.fullName;save();
+    leaderPanel(r.j);
+  }).catch(function(){document.getElementById('tMsg').textContent='연결 실패';});
+}
+function leaderPanel(info){
+  var warn=info.pwChanged?'':'<div class="setup-note">⚠️ 아직 기본 비밀번호(0000)예요. 아래에서 꼭 바꿔주세요.</div>';
+  var box=document.getElementById('troop-body');
+  box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🔑 '+state.troopName+'</h2></div>'+warn
+    +'<div class="section-label">비밀번호 바꾸기</div>'
+    +'<div class="trip-form" style="display:flex"><label>새 비밀번호 <input id="tNewPw" type="password" placeholder="4자 이상"></label>'
+    +'<button class="big-next" onclick="doChangePw()">변경</button></div>'
+    +'<div class="section-label">알림 허용 기간</div>'
+    +'<div class="trip-form" style="display:flex"><label>시작 <input id="tStart" type="date" value="'+(info.notifyStart?String(info.notifyStart).slice(0,10):'')+'"></label>'
+    +'<label>종료 <input id="tEnd" type="date" value="'+(info.notifyEnd?String(info.notifyEnd).slice(0,10):'')+'"></label>'
+    +'<button class="big-next" onclick="doSaveConfig()">기간 저장</button></div>'
+    +'<div class="section-label">알림 보내기</div>'
+    +'<div class="trip-form" style="display:flex"><label>제목 <input id="tTitle" placeholder="예: 출발 안내"></label>'
+    +'<label>내용 <input id="tBody" placeholder="예: 9시 10분 성당 앞 집합"></label>'
+    +'<button class="big-next gold" onclick="doNotify('+(info.pwChanged?'true':'false')+')">알림 발송</button></div>'
+    +'<div class="feedback" id="tMsg"></div>';
+}
+function doChangePw(){
+  var np=document.getElementById('tNewPw').value;
+  api('/api/change-pw',{id:state.troopId,pw:leaderPw,newPw:np}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'실패';return;}
+    leaderPw=np;m.className='feedback good';m.textContent='비밀번호를 바꿨어요 ✓';
+  });
+}
+function doSaveConfig(){
+  var s=document.getElementById('tStart').value,e=document.getElementById('tEnd').value;
+  var start=s?s+'T00:00:00+09:00':null,end=e?e+'T23:59:59+09:00':null;
+  api('/api/config',{id:state.troopId,pw:leaderPw,start:start,end:end}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'실패';return;}
+    m.className='feedback good';m.textContent='기간을 저장했어요 ✓';
+  });
+}
+function doNotify(pwChanged){
+  var title=document.getElementById('tTitle').value.trim(),bd=document.getElementById('tBody').value.trim();
+  if(!title||!bd){var m0=document.getElementById('tMsg');m0.className='feedback soft';m0.textContent='제목과 내용을 입력해 주세요';return;}
+  if(!pwChanged && !confirm('아직 기본 비밀번호(0000)를 쓰고 있어요.\n다른 사람도 발송할 수 있으니, 먼저 비밀번호를 바꾸는 것을 권해요.\n그래도 지금 발송할까요?'))return;
+  api('/api/notify',{id:state.troopId,pw:leaderPw,title:title,body:bd}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'발송 실패';return;}
+    m.className='feedback good';m.textContent='알림을 보냈어요! 🔔';
+  });
+}
 function addCourse(k){var a=state.myCourse||(state.myCourse=[]);if(a.indexOf(k)<0)a.push(k);save();renderCourse();}
 function dropCourse(k){var a=state.myCourse||[];var i=a.indexOf(k);if(i>=0)a.splice(i,1);save();renderCourse();}
 function moveCourse(i,dir){var a=state.myCourse,j=i+dir;if(j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;save();renderCourse();}
@@ -1474,7 +1624,7 @@ function confetti(){
 }
 function resetAll(){
   if(confirm('정말 처음부터 다시 시작할까요? 모든 도장이 사라져요.')){
-    state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false};
+    state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
     bingoFound={};save();
     document.getElementById('nameInput').value='';
     document.querySelectorAll('.mission').forEach(function(m){m.classList.remove('on');});
