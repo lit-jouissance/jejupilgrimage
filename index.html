@@ -74,6 +74,7 @@
     font-family:inherit;font-weight:800;font-size:15px;padding:10px 15px;cursor:pointer;}
   .name-ok:active{transform:scale(.95);}
   .name-hi{margin-top:10px;font-size:14px;color:#fff;opacity:.92;font-weight:700;min-height:18px;}
+  .name-edit{text-decoration:underline;cursor:pointer;opacity:.8;margin-left:8px;font-weight:700;}
 
   .section-label{
     font-size:14px;font-weight:800;color:var(--coral);letter-spacing:1px;
@@ -419,7 +420,7 @@
       <div class="boat">⛵</div>
       <h1 id="coverTitle">제주 순례여권</h1>
       <p>제주 신앙 선조들의 숨결과 발자취를 따라 믿음을 키워요</p>
-      <div class="namerow">
+      <div class="namerow" id="nameRow">
         <input id="nameInput" placeholder="이름" maxlength="10">
         <input id="baptInput" placeholder="세례명" maxlength="12">
         <button class="name-ok" onclick="applyName()">확인</button>
@@ -1734,10 +1735,19 @@ function setCoverTitle(){var t=document.getElementById('coverTitle');if(t)t.text
 function applyName(){
   state.name=(document.getElementById('nameInput').value||'').trim();
   state.baptismal=(document.getElementById('baptInput').value||'').trim();
-  save();setCoverTitle();
-  var hi=document.getElementById('nameHi');
-  if(hi)hi.textContent=state.name?(nameFull()+'님, 환영합니다.'):'';
+  save();setCoverTitle();showWelcome();
 }
+function showWelcome(){
+  var row=document.getElementById('nameRow'),hi=document.getElementById('nameHi');
+  if(state.name){
+    if(row)row.style.display='none';
+    if(hi)hi.innerHTML='환영합니다. <P><span class="name-edit" onclick="editName()" align=right>이름 수정</span>';
+  }else{
+    if(row)row.style.display='flex';
+    if(hi)hi.textContent='';
+  }
+}
+function editName(){var row=document.getElementById('nameRow');if(row)row.style.display='flex';}
 var SAINT_QUOTES=[
   {t:'행복합니다, 마음속으로 순례의 길을 생각할 때 당신께 힘을 얻는 사람들!',by:'시편 84,6'},
   {t:'환난은 인내를 자아내고 인내는 수양을, 수양은 희망을 자아냅니다. 그리고 희망은 우리를 부끄럽게 하지 않습니다.',by:'로마 5,3-5'},
@@ -1766,7 +1776,7 @@ var bi=document.getElementById('baptInput');
 bi.value=state.baptismal||'';
 bi.addEventListener('input',function(){state.baptismal=bi.value;save();});
 setCoverTitle();
-if(state.name){var _hi=document.getElementById('nameHi');if(_hi)_hi.textContent=nameFull()+'님, 환영합니다.';}
+showWelcome();
 state.missions.forEach(function(v,i){if(v){var ms=document.querySelectorAll('#daejeong .mission')[i];if(ms)ms.classList.add('on');}});
 renderSites();
 renderMoreList();
