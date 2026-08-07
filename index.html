@@ -66,6 +66,14 @@
     font-family:inherit;outline:none;min-width:0;
   }
   .namebox input::placeholder{color:rgba(255,255,255,.6);}
+  .namerow{display:flex;gap:6px;align-items:center;max-width:360px;margin:18px auto 0;}
+  .namerow input{flex:1;min-width:0;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.55);
+    border-radius:12px;color:#fff;font-size:15px;font-weight:800;font-family:inherit;padding:10px;outline:none;}
+  .namerow input::placeholder{color:rgba(255,255,255,.65);font-weight:600;}
+  .name-ok{flex:0 0 auto;background:#fff;color:#c0453f;border:none;border-radius:12px;
+    font-family:inherit;font-weight:800;font-size:15px;padding:10px 15px;cursor:pointer;}
+  .name-ok:active{transform:scale(.95);}
+  .name-hi{margin-top:10px;font-size:14px;color:#fff;opacity:.92;font-weight:700;min-height:18px;}
 
   .section-label{
     font-size:14px;font-weight:800;color:var(--coral);letter-spacing:1px;
@@ -409,12 +417,14 @@
   <section id="home" class="screen active">
     <div class="cover">
       <div class="boat">⛵</div>
-      <h1>제주 순례여권</h1>
+      <h1 id="coverTitle">제주 순례여권</h1>
       <p>제주 신앙 선조들의 숨결과 발자취를 따라 믿음을 키워요</p>
-      <div class="namebox">
-        <span>이름</span>
-        <input id="nameInput" placeholder="여기에 적어요" maxlength="8">
+      <div class="namerow">
+        <input id="nameInput" placeholder="이름" maxlength="10">
+        <input id="baptInput" placeholder="세례명" maxlength="12">
+        <button class="name-ok" onclick="applyName()">확인</button>
       </div>
+      <div class="name-hi" id="nameHi"></div>
     </div>
 
     <button class="route-cta" style="background:linear-gradient(120deg,#2f7d4f,#3f9c63)" onclick="go('course')">
@@ -749,7 +759,7 @@
 <script>
 /* ---------------- state ---------------- */
 var KEY='pilgrim_v1';
-var state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
+var state={name:'',baptismal:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
 try{var s=localStorage.getItem(KEY);if(s)state=Object.assign(state,JSON.parse(s));}catch(e){}
 (function(){var def=['yongsu','daejeong','hallim'];
   if(!Array.isArray(state.order)||state.order.length!==3||def.some(function(k){return state.order.indexOf(k)<0;}))state.order=def.slice();
@@ -788,9 +798,11 @@ function cloudSave(){
   clearTimeout(cloudTimer);
   cloudTimer=setTimeout(function(){
     try{
-      cloudDb.collection('pilgrims').doc(pkey(state.name)).set({
-        name:state.name,done:state.done,missions:state.missions,updatedAt:Date.now()
-      },{merge:true});
+      var data={name:state.name,baptismal:state.baptismal||'',done:state.done,missions:state.missions,updatedAt:Date.now()};
+      var ref=state.troopId
+        ? cloudDb.collection('pilgrimages').doc(state.troopId).collection('members').doc(pkey(state.name))
+        : cloudDb.collection('pilgrims').doc(pkey(state.name));
+      ref.set(data,{merge:true});
     }catch(e){}
   },1200);
 }
@@ -1640,6 +1652,14 @@ function bonusCount(r){
   ['boat','daejeong_ox','hallim_journey','memory','match'].forEach(function(k){if(d[k])n++;});
   return n;
 }
+function totalSitesDone(r){
+  var d=r.done||{};var n=0;
+  if(d.yongsu_ox&&d.yongsu_bingo)n++;
+  if(d.daejeong)n++;
+  if(d.hallim_gift&&d.hallim_quote&&d.hallim_ox)n++;
+  ['giryang','gyeonghan','saemi','hwangsapyeong','gwandeok','hanon'].forEach(function(k){if(d['more_'+k])n++;});
+  return n;
+}
 function loadTeacher(){
   var box=document.getElementById('box-teacher');
   if(!initCloud()){
@@ -1650,7 +1670,10 @@ function loadTeacher(){
     return;
   }
   box.innerHTML='<p class="bingo-hint">기록을 불러오는 중...</p>';
-  cloudDb.collection('pilgrims').get().then(function(snap){
+  var col=state.troopId
+    ? cloudDb.collection('pilgrimages').doc(state.troopId).collection('members')
+    : cloudDb.collection('pilgrims');
+  col.get().then(function(snap){
     var rows=[];snap.forEach(function(d){rows.push(d.data());});
     rows.sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0);});
     renderTeacher(rows);
@@ -1660,20 +1683,27 @@ function loadTeacher(){
 }
 function renderTeacher(rows){
   var box=document.getElementById('box-teacher');
-  if(!rows.length){box.innerHTML='<p class="bingo-hint">아직 저장된 기록이 없어요. 아이들이 이름을 적고 활동을 시작하면 여기에 나타나요.</p>';return;}
-  var done3=rows.filter(function(r){return recDone(r,'yongsu')&&recDone(r,'daejeong')&&recDone(r,'hallim');}).length;
-  var html='<div class="t-summary">참여 '+rows.length+'명 · 여권 완성 '+done3+'명</div>';
-  html+='<div class="t-wrap"><table class="t-table"><thead><tr>'
-    +'<th>이름</th><th>⛵</th><th>🌿</th><th>🐑</th><th>⭐</th><th>업데이트</th></tr></thead><tbody>';
+  var head=state.troopId
+    ?'<div class="t-summary">🔔 '+escapeHtml(state.troopName||'순례단')+' · 단원 '+rows.length+'명</div>'
+    :'<div class="t-summary">전체 참여 '+rows.length+'명</div>';
+  if(!rows.length){
+    box.innerHTML=head+'<p class="bingo-hint">'+(state.troopId
+      ?'아직 이 순례단에 이름을 적고 활동한 단원이 없어요.'
+      :'아직 저장된 기록이 없어요. 순례단에 들어가면 순례단별 명단으로 볼 수 있어요.')+'</p>';
+    return;
+  }
+  var html=head+'<div class="t-wrap"><table class="t-table"><thead><tr>'
+    +'<th>이름</th><th>완료 성지</th><th>보너스</th><th>업데이트</th></tr></thead><tbody>';
   rows.forEach(function(r){
-    function mk(s){return recDone(r,s)?'<span class="ok">✓</span>':'<span class="no">·</span>';}
     var t=r.updatedAt?new Date(r.updatedAt):null;
     var ts=t?(t.getMonth()+1)+'/'+t.getDate()+' '+('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2):'-';
-    html+='<tr><td class="nm">'+escapeHtml(r.name||'-')+'</td><td>'+mk('yongsu')+'</td><td>'+mk('daejeong')
-      +'</td><td>'+mk('hallim')+'</td><td>'+bonusCount(r)+'/5</td><td class="tm">'+ts+'</td></tr>';
+    html+='<tr><td class="nm">'+escapeHtml(r.name||'-')+(r.baptismal?' <small style="color:#8a97a0;font-weight:600">('+escapeHtml(r.baptismal)+')</small>':'')+'</td>'
+      +'<td><b>'+totalSitesDone(r)+'</b>곳</td>'
+      +'<td>'+bonusCount(r)+'/5</td><td class="tm">'+ts+'</td></tr>';
   });
   html+='</tbody></table></div>';
-  html+='<p class="bingo-hint">⛵ 용수 · 🌿 대정 · 🐑 한림 도장 / ⭐ 보너스 활동 수. 인터넷이 연결돼 있을 때 최신으로 보여요.</p>';
+  html+='<p class="bingo-hint">‘완료 성지’는 미션을 마쳐 도장을 받은 성지 수예요. 인터넷이 연결돼 있을 때 최신으로 보여요.'
+    +(state.troopId?'':' 순례단에 들어가면 순례단별 단원 명단으로 볼 수 있어요.')+'</p>';
   box.innerHTML=html;
 }
 function escapeHtml(s){return (s+'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
@@ -1690,7 +1720,7 @@ function confetti(){
 }
 function resetAll(){
   if(confirm('정말 처음부터 다시 시작할까요? 모든 도장이 사라져요.')){
-    state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
+    state={name:'',baptismal:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
     bingoFound={};save();
     document.getElementById('nameInput').value='';
     document.querySelectorAll('.mission').forEach(function(m){m.classList.remove('on');});
@@ -1699,6 +1729,15 @@ function resetAll(){
 }
 
 /* ---------------- init ---------------- */
+function nameFull(){return (state.name||'')+((state.name&&state.baptismal)?(' '+state.baptismal):'');}
+function setCoverTitle(){var t=document.getElementById('coverTitle');if(t)t.textContent=state.name?(nameFull()+'의 제주 순례여권'):'제주 순례여권';}
+function applyName(){
+  state.name=(document.getElementById('nameInput').value||'').trim();
+  state.baptismal=(document.getElementById('baptInput').value||'').trim();
+  save();setCoverTitle();
+  var hi=document.getElementById('nameHi');
+  if(hi)hi.textContent=state.name?(nameFull()+'님, 환영합니다.'):'';
+}
 var SAINT_QUOTES=[
   {t:'행복합니다, 마음속으로 순례의 길을 생각할 때 당신께 힘을 얻는 사람들!',by:'시편 84,6'},
   {t:'환난은 인내를 자아내고 인내는 수양을, 수양은 희망을 자아냅니다. 그리고 희망은 우리를 부끄럽게 하지 않습니다.',by:'로마 5,3-5'},
@@ -1723,6 +1762,11 @@ showSplash();
 var ni=document.getElementById('nameInput');
 ni.value=state.name||'';
 ni.addEventListener('input',function(){state.name=ni.value;save();});
+var bi=document.getElementById('baptInput');
+bi.value=state.baptismal||'';
+bi.addEventListener('input',function(){state.baptismal=bi.value;save();});
+setCoverTitle();
+if(state.name){var _hi=document.getElementById('nameHi');if(_hi)_hi.textContent=nameFull()+'님, 환영합니다.';}
 state.missions.forEach(function(v,i){if(v){var ms=document.querySelectorAll('#daejeong .mission')[i];if(ms)ms.classList.add('on');}});
 renderSites();
 renderMoreList();
