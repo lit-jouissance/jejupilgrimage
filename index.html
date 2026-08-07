@@ -760,7 +760,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}c
 /* 사용하려면 아래 FIREBASE_CONFIG에 본인 프로젝트 설정을 붙여넣고,
    TEACHER_PIN을 원하는 숫자로 바꾸세요. 비워두면 이 기기 안에서만 저장됩니다. */
 var FIREBASE_CONFIG={
-   apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
+  apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
   authDomain: "jeju-pilgrimage-653d9.firebaseapp.com",
   projectId: "jeju-pilgrimage-653d9",
   storageBucket: "jeju-pilgrimage-653d9.firebasestorage.app",
@@ -1492,6 +1492,13 @@ function enableAlerts(id){
     return Notification.requestPermission().then(function(p){
       if(p!=='granted'){return null;}
       return firebase.messaging().getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg}).then(function(token){
+        try{firebase.messaging().onMessage(function(payload){
+          if(payload&&payload.data&&payload.data.type==='course-updated'&&state.troopId){
+            fetch('/api/config?id='+encodeURIComponent(state.troopId)).then(function(r){return r.json();}).then(function(j){
+              if(adoptCourse(j)){var el=document.getElementById('home');if(el&&el.classList.contains('active'))layoutHome();}
+            }).catch(function(){});
+          }
+        });}catch(e){}
         return api('/api/join',{id:id,token:token}).then(function(r){
           if(!r.ok){return null;}
           return r.j;
@@ -1545,7 +1552,7 @@ function doShareCourse(){
   api('/api/set-course',{id:state.troopId,pw:leaderPw,course:state.myCourse,tripDate:state.tripDate,departTime:state.departTime}).then(function(r){
     var m=document.getElementById('tMsg');
     if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'공유 실패';return;}
-    m.className='feedback good';m.textContent='순례 일정을 공유했어요! 단원이 받아 볼 수 있어요 ✓';
+    m.className='feedback good';m.textContent=(r.j.notified?'순례 일정을 공유하고 단원에게 알림을 보냈어요! ✓':'순례 일정을 공유했어요! (구독한 단원이 아직 없어요) ✓');
   }).catch(function(){var m=document.getElementById('tMsg');m.className='feedback soft';m.textContent='연결 실패';});
 }
 function doDeleteTroop(){
