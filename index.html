@@ -473,8 +473,8 @@
       </div>
     </div>
 
-    <button class="reset" onclick="openTeacher()">📋 순례 기록 보기 (선생님용)</button>
-    <button class="reset" onclick="resetAll()">처음부터 다시 시작 (선생님용)</button>
+    <button class="reset" onclick="openTeacher()">📋 순례 기록 보기 (admin용)</button>
+    <button class="reset" onclick="askReset()">처음부터 다시 시작 (admin용)</button>
   </section>
 
   <!-- ===================== 다른 성지 상세 ===================== -->
@@ -760,7 +760,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}c
 /* 사용하려면 아래 FIREBASE_CONFIG에 본인 프로젝트 설정을 붙여넣고,
    TEACHER_PIN을 원하는 숫자로 바꾸세요. 비워두면 이 기기 안에서만 저장됩니다. */
 var FIREBASE_CONFIG={
- apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
+  apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
   authDomain: "jeju-pilgrimage-653d9.firebaseapp.com",
   projectId: "jeju-pilgrimage-653d9",
   storageBucket: "jeju-pilgrimage-653d9.firebasestorage.app",
@@ -1504,7 +1504,20 @@ function leaderPanel(info){
     +'<div class="trip-form" style="display:flex"><label>제목 <input id="tTitle" placeholder="예: 출발 안내"></label>'
     +'<label>내용 <input id="tBody" placeholder="예: 9시 10분 성당 앞 집합"></label>'
     +'<button class="big-next gold" onclick="doNotify('+(info.pwChanged?'true':'false')+')">알림 발송</button></div>'
+    +'<div class="section-label">순례단 관리</div>'
+    +'<button class="reset" style="color:#cf4d4d" onclick="doDeleteTroop()">이 순례단 삭제하기</button>'
     +'<div class="feedback" id="tMsg"></div>';
+}
+function doDeleteTroop(){
+  if(!confirm('정말 이 순례단을 삭제할까요?\n삭제하면 단원 알림 구독과 설정이 모두 사라져요.'))return;
+  api('/api/delete',{id:state.troopId,pw:leaderPw}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'삭제 실패';return;}
+    if(state.troopId===state.troopId){state.troopId='';state.troopName='';save();}
+    leaderPw='';
+    alert('순례단을 삭제했어요.');
+    renderTroop();
+  }).catch(function(){var m=document.getElementById('tMsg');m.className='feedback soft';m.textContent='연결 실패';});
 }
 function doChangePw(){
   var np=document.getElementById('tNewPw').value;
@@ -1557,10 +1570,16 @@ function renderMyCourse(){
 
 /* ---------------- 선생님 기록 보기 ---------------- */
 function openTeacher(){
-  var pin=prompt('선생님 비밀번호를 입력하세요');
+  var pin=prompt('admin 비밀번호를 입력하세요');
   if(pin===null)return;
   if(pin!==TEACHER_PIN){alert('비밀번호가 맞지 않아요.');return;}
   go('teacher');loadTeacher();
+}
+function askReset(){
+  var pin=prompt('admin 비밀번호를 입력하세요');
+  if(pin===null)return;
+  if(pin!==TEACHER_PIN){alert('비밀번호가 맞지 않아요.');return;}
+  resetAll();
 }
 function recDone(r,site){
   var d=r.done||{};
