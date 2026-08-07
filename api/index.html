@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>제주 순례여권</title>
+<style>
+  :root{
+    --sea-deep:#163b5c;
+    --sea:#2f8aa3;
+    --sea-light:#cdeaef;
+    --sand:#fbf2e0;
+    --sand-deep:#f3e3c4;
+    --gold:#f1b138;
+    --coral:#e96f4d;
+    --green:#5aa86b;
+    --ink:#1f2d36;
+    --card:#fffaf0;
+    --line:#e3d4b4;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+    background:
+      radial-gradient(circle at 20% 0%, #bfe3e8 0%, transparent 45%),
+      radial-gradient(circle at 90% 10%, #ffe6b8 0%, transparent 40%),
+      var(--sand);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 40px;}
+  .screen{display:none;animation:fade .25s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  /* ---- top bar ---- */
+  .topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:52px;}
+  .back{
+    background:var(--card);border:2px solid var(--line);border-radius:16px;
+    font-size:20px;font-weight:800;color:var(--sea-deep);
+    padding:10px 16px;cursor:pointer;line-height:1;
+  }
+  .back:active{transform:scale(.96);}
+  .topbar h2{font-size:22px;margin:0;color:var(--sea-deep);font-weight:800;}
+
+  /* ---- cover ---- */
+  .cover{
+    text-align:center;background:linear-gradient(170deg,#e05c61,#f08a7e);
+    border-radius:28px;padding:30px 22px 26px;color:#fff;position:relative;overflow:hidden;
+    box-shadow:0 14px 34px rgba(224,92,97,.28);
+  }
+  .cover .waves{position:absolute;left:0;right:0;bottom:0;height:60px;opacity:.4;}
+  .cover .boat{font-size:46px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25));}
+  .cover h1{font-size:30px;margin:6px 0 4px;font-weight:900;letter-spacing:-1px;}
+  .cover p{margin:0;font-size:16px;opacity:.92;}
+  .namebox{
+    margin:18px auto 0;max-width:300px;background:rgba(255,255,255,.16);
+    border:2px dashed rgba(255,255,255,.6);border-radius:16px;padding:10px 14px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .namebox span{font-size:15px;opacity:.9;white-space:nowrap;}
+  .namebox input{
+    flex:1;background:transparent;border:none;color:#fff;font-size:18px;font-weight:800;
+    font-family:inherit;outline:none;min-width:0;
+  }
+  .namebox input::placeholder{color:rgba(255,255,255,.6);}
+
+  .section-label{
+    font-size:14px;font-weight:800;color:var(--coral);letter-spacing:1px;
+    margin:24px 4px 10px;text-transform:none;
+  }
+
+  /* ---- site cards ---- */
+  .site{
+    display:flex;align-items:center;gap:14px;background:var(--card);
+    border:2px solid var(--line);border-radius:22px;padding:16px;margin-bottom:14px;
+    cursor:pointer;position:relative;transition:transform .12s;
+  }
+  .site:active{transform:scale(.985);}
+  .site .num{
+    width:54px;height:54px;flex:0 0 54px;border-radius:50%;
+    background:var(--sea-light);color:var(--sea-deep);
+    display:flex;align-items:center;justify-content:center;font-size:30px;
+  }
+  .site .info{flex:1;min-width:0;}
+  .site .info b{font-size:20px;display:block;color:var(--sea-deep);}
+  .site .info small{font-size:14px;color:#6b7a82;}
+  .stamp{
+    width:62px;height:62px;flex:0 0 62px;border-radius:50%;
+    border:3px dashed var(--line);display:flex;align-items:center;justify-content:center;
+    font-size:13px;color:#b9a987;text-align:center;line-height:1.1;font-weight:700;
+  }
+  .stamp.done{color:var(--coral);font-size:26px;
+    border:3px solid var(--coral);
+    transform:rotate(-12deg);background:rgba(233,111,77,.08);
+    animation:pop .4s ease;
+  }
+  @keyframes pop{0%{transform:scale(0) rotate(0);}70%{transform:scale(1.25) rotate(-12deg);}100%{transform:scale(1) rotate(-12deg);}}
+  .order-head{display:flex;align-items:center;gap:8px;}
+  .order-toggle{
+    margin-left:auto;background:var(--card);border:2px solid var(--line);border-radius:14px;
+    font-size:13px;font-weight:800;color:var(--sea-deep);padding:6px 11px;cursor:pointer;font-family:inherit;
+  }
+  .order-toggle.on{background:var(--sea-deep);color:#fff;border-color:var(--sea-deep);}
+  .order-toggle:active{transform:scale(.96);}
+  .reorder{display:flex;flex-direction:column;gap:4px;margin-left:6px;}
+  .reorder button{
+    width:38px;height:30px;border:2px solid var(--line);background:#fff;border-radius:10px;
+    font-size:15px;font-weight:900;color:var(--sea-deep);cursor:pointer;font-family:inherit;line-height:1;
+  }
+  .reorder button:disabled{opacity:.3;}
+  .reorder button:active{transform:scale(.92);}
+
+  .bonus{
+    display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,#fff5dc,#ffe9c2);
+    border:2px solid var(--sand-deep);border-radius:22px;padding:14px 16px;cursor:pointer;
+  }
+  .bonus:active{transform:scale(.985);}
+  .bonus .num{font-size:30px;}
+  .bonus b{font-size:19px;color:#c9821f;display:block;}
+  .bonus small{font-size:14px;color:#a8854a;}
+
+  /* ---- generic activity menu buttons ---- */
+  .menu-btn{
+    width:100%;text-align:left;background:var(--card);border:2px solid var(--line);
+    border-radius:20px;padding:18px 18px;margin-bottom:12px;cursor:pointer;
+    display:flex;align-items:center;gap:14px;font-family:inherit;
+  }
+  .menu-btn:active{transform:scale(.985);}
+  .menu-btn .ic{font-size:32px;}
+  .menu-btn .t b{font-size:19px;color:var(--sea-deep);display:block;}
+  .menu-btn .t small{font-size:14px;color:#6b7a82;}
+  .menu-btn .chk{margin-left:auto;font-size:24px;color:var(--green);}
+
+  .intro-card{
+    background:var(--card);border:2px solid var(--line);border-radius:22px;
+    padding:20px;margin-bottom:16px;font-size:17px;line-height:1.7;
+  }
+  .intro-card .em{font-size:38px;display:block;margin-bottom:8px;}
+  .intro-card strong{color:var(--coral);}
+
+  /* ---- OX quiz ---- */
+  .q-progress{font-size:15px;color:#7a8891;font-weight:700;margin-bottom:8px;}
+  .q-card{
+    background:var(--card);border:2px solid var(--line);border-radius:24px;
+    padding:30px 22px;text-align:center;font-size:23px;font-weight:800;
+    line-height:1.5;color:var(--ink);min-height:150px;
+    display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  }
+  .ox-row{display:flex;gap:14px;}
+  .ox{
+    flex:1;border:none;border-radius:24px;padding:30px 0;font-size:54px;cursor:pointer;
+    font-family:inherit;font-weight:900;color:#fff;
+  }
+  .ox.o{background:linear-gradient(160deg,#43b06a,#2f8a52);}
+  .ox.x{background:linear-gradient(160deg,#ec6f6f,#cf4d4d);}
+  .ox:active{transform:scale(.95);}
+  .ox:disabled{opacity:.5;}
+  .feedback{
+    text-align:center;font-size:22px;font-weight:800;margin:18px 0;min-height:34px;
+  }
+  .feedback.good{color:var(--green);}
+  .feedback.soft{color:var(--coral);}
+
+  .big-next{
+    width:100%;background:var(--sea-deep);color:#fff;border:none;border-radius:20px;
+    padding:18px;font-size:20px;font-weight:800;font-family:inherit;cursor:pointer;margin-top:6px;
+  }
+  .big-next:active{transform:scale(.98);}
+  .big-next.gold{background:var(--gold);color:#3a2c08;}
+  .big-next:disabled{opacity:.4;}
+
+  /* ---- bingo ---- */
+  .bingo-hint{font-size:16px;color:#6b7a82;margin:0 4px 12px;line-height:1.5;}
+  .bingo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+  .tile{
+    aspect-ratio:1/1;background:var(--card);border:2px solid var(--line);border-radius:18px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    cursor:pointer;font-family:inherit;
+  }
+  .tile .e{font-size:34px;}
+  .tile .l{font-size:13px;font-weight:700;color:#6b7a82;}
+  .tile.found{background:rgba(90,168,107,.14);border-color:var(--green);position:relative;}
+  .tile.found::after{content:"✓";position:absolute;top:6px;right:9px;color:var(--green);font-size:20px;font-weight:900;}
+  .tile:active{transform:scale(.95);}
+  .count-pill{text-align:center;font-size:18px;font-weight:800;color:var(--sea-deep);margin-bottom:14px;}
+
+  /* ---- gift sort ---- */
+  .sort-card{
+    background:var(--card);border:2px solid var(--line);border-radius:24px;
+    padding:34px 22px;text-align:center;margin-bottom:18px;min-height:170px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  }
+  .sort-card .e{font-size:64px;}
+  .sort-card .l{font-size:24px;font-weight:800;}
+  .sort-row{display:flex;gap:14px;}
+  .sort-btn{
+    flex:1;border:none;border-radius:22px;padding:22px 0;font-size:18px;font-weight:800;
+    cursor:pointer;font-family:inherit;color:#fff;line-height:1.3;
+  }
+  .sort-btn.yes{background:linear-gradient(160deg,#43b06a,#2f8a52);}
+  .sort-btn.no{background:linear-gradient(160deg,#8e9aa3,#6f7b84);}
+  .sort-btn:active{transform:scale(.96);}
+  .sort-btn:disabled{opacity:.5;}
+
+  /* ---- choice (quote) ---- */
+  .choice{
+    width:100%;background:var(--card);border:2px solid var(--line);border-radius:20px;
+    padding:20px;font-size:21px;font-weight:800;cursor:pointer;font-family:inherit;
+    margin-bottom:12px;color:var(--sea-deep);
+  }
+  .choice:active{transform:scale(.98);}
+  .choice.right{background:rgba(90,168,107,.15);border-color:var(--green);color:var(--green);}
+  .choice.wrong{background:rgba(236,111,111,.12);border-color:#ec6f6f;color:#cf4d4d;}
+
+  /* ---- quiet mission (daejeong) ---- */
+  .mission{
+    display:flex;align-items:center;gap:14px;background:var(--card);
+    border:2px solid var(--line);border-radius:20px;padding:18px;margin-bottom:12px;cursor:pointer;
+  }
+  .mission .box{
+    width:38px;height:38px;flex:0 0 38px;border:3px solid var(--line);border-radius:12px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;color:transparent;
+  }
+  .mission.on .box{border-color:var(--green);color:var(--green);}
+  .mission span{font-size:18px;font-weight:700;line-height:1.4;}
+  .mission:active{transform:scale(.99);}
+  .prayer{
+    background:linear-gradient(165deg,#2f6e88,#274f63);color:#fff;border-radius:24px;
+    padding:24px 22px;text-align:center;font-size:18px;line-height:1.8;margin:18px 0;
+  }
+  .prayer .em{font-size:34px;}
+
+  /* ---- finish ---- */
+  .finish{text-align:center;padding:10px 0;}
+  .finish .big{font-size:70px;}
+  .finish h3{font-size:26px;color:var(--coral);margin:8px 0;}
+  .finish p{font-size:18px;color:#5d6b73;line-height:1.6;margin:0 0 18px;}
+
+  .celebrate{
+    text-align:center;background:linear-gradient(170deg,var(--gold),#ef9d3a);
+    border-radius:28px;padding:36px 24px;color:#3a2c08;box-shadow:0 14px 34px rgba(241,177,56,.4);
+  }
+  .celebrate .big{font-size:74px;}
+  .celebrate h2{font-size:28px;margin:8px 0;font-weight:900;}
+  .celebrate p{font-size:17px;margin:0;line-height:1.6;}
+
+  .reset{
+    display:block;margin:30px auto 0;background:none;border:none;color:#b9a987;
+    font-size:13px;text-decoration:underline;cursor:pointer;font-family:inherit;
+  }
+  .confetti{position:fixed;top:-20px;font-size:26px;pointer-events:none;z-index:50;animation:fall 2.2s linear forwards;}
+  @keyframes fall{to{transform:translateY(105vh) rotate(360deg);opacity:0;}}
+
+  /* ---- 임승필 베타 코너 (보라 계열) ---- */
+  :root{--violet:#7a5fb0;--violet-deep:#553d86;--lav:#efe9fb;}
+  .beta-badge{
+    display:inline-block;background:var(--violet);color:#fff;font-size:11px;font-weight:900;
+    letter-spacing:1px;padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:middle;
+  }
+  .beta-card{
+    display:flex;align-items:center;gap:12px;border-radius:22px;padding:14px 16px;cursor:pointer;
+    background:linear-gradient(120deg,#f3eefc,#e7defa);border:2px solid #d8c9f3;
+  }
+  .beta-card:active{transform:scale(.985);}
+  .beta-card .num{font-size:30px;}
+  .beta-card b{font-size:19px;color:var(--violet-deep);display:block;}
+  .beta-card small{font-size:14px;color:#8a78ac;}
+  .beta-card .seal{margin-left:auto;font-size:26px;}
+  .v-topbar h2{color:var(--violet-deep);}
+  .v-intro{background:var(--lav);border:2px solid #d8c9f3;}
+  .v-intro strong{color:var(--violet-deep);}
+  .v-menu{border-color:#d8c9f3;}
+  .v-menu .t b{color:var(--violet-deep);}
+  .v-next{background:var(--violet-deep)!important;}
+  .v-next.gold{background:var(--violet)!important;color:#fff!important;}
+  .journey-card{
+    background:var(--lav);border:2px solid #d8c9f3;border-radius:24px;padding:30px 22px;text-align:center;
+    min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    font-size:19px;line-height:1.6;color:var(--ink);
+  }
+  .journey-card .e{font-size:56px;}
+  .journey-card strong{color:var(--violet-deep);}
+  .jdots{display:flex;gap:8px;justify-content:center;margin:14px 0;}
+  .jdots span{width:10px;height:10px;border-radius:50%;background:#d8c9f3;}
+  .jdots span.on{background:var(--violet);}
+
+  /* ---- 보너스: 기억력 카드 ---- */
+  .bonus .seal{margin-left:auto;font-size:24px;}
+  .mem-stat{text-align:center;font-weight:800;color:var(--sea-deep);font-size:17px;margin-bottom:12px;}
+  .mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+  .mem-card{
+    aspect-ratio:1/1;border:none;border-radius:16px;background:linear-gradient(160deg,#2f8aa3,#1f6c84);
+    color:#fff;font-size:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;
+  }
+  .mem-card:active{transform:scale(.95);}
+  .mem-card.up{background:var(--card);border:2px solid var(--gold);}
+  .mem-card.matched{background:rgba(90,168,107,.16);border:2px solid var(--green);}
+  .mem-card.lock{pointer-events:none;}
+
+  /* ---- 오늘의 길 ---- */
+  .route-cta{
+    display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+    background:linear-gradient(120deg,#2f7d4f,#3f9c63);color:#fff;border:none;
+    border-radius:20px;padding:16px;margin:16px 0 4px;cursor:pointer;font-family:inherit;
+  }
+  .route-cta:active{transform:scale(.985);}
+  .route-cta .ic{font-size:30px;}
+  .route-cta b{font-size:19px;display:block;}
+  .route-cta small{font-size:14px;opacity:.9;}
+  .route-cta .go{margin-left:auto;font-size:22px;}
+  .route-day{font-size:15px;color:#7a8891;font-weight:700;margin:0 4px 16px;}
+  .trip-edit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:14px;}
+  .trip-now{font-size:17px;color:var(--sea-deep);}
+  .trip-now b{font-weight:800;}
+  .trip-form{display:none;width:100%;flex-direction:column;gap:10px;margin-top:6px;}
+  .trip-form label{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;}
+  .trip-form input{flex:1;font-family:inherit;font-size:16px;padding:10px;border:2px solid var(--line);border-radius:12px;background:#fff;}
+  .trip-form .big-next{margin-top:4px;}
+  .stop{display:flex;gap:12px;}
+  .stop .rail{display:flex;flex-direction:column;align-items:center;flex:0 0 36px;}
+  .stop .dot{
+    width:36px;height:36px;border-radius:50%;background:var(--sea-deep);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex:0 0 36px;
+  }
+  .stop.end .dot{background:var(--coral);}
+  .stop .line{flex:1;width:3px;background:var(--line);margin:3px 0;min-height:14px;}
+  .stop .body{flex:1;padding-bottom:6px;}
+  .time-chip{display:inline-block;background:var(--gold);color:#3a2c08;font-weight:800;font-size:14px;padding:3px 11px;border-radius:999px;margin-bottom:7px;}
+  .stop-card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px;}
+  .stop-card b{font-size:18px;color:var(--sea-deep);display:block;line-height:1.3;}
+  .stop-card .note{font-size:14px;color:#6b7a82;line-height:1.55;margin-top:5px;}
+  .stop-actions{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;}
+  .act{text-decoration:none;font-size:14px;font-weight:800;padding:9px 13px;border-radius:12px;border:2px solid var(--line);color:var(--sea-deep);background:#fff;}
+  .act.nav{background:var(--sea-deep);color:#fff;border-color:var(--sea-deep);}
+  .act:active{transform:scale(.96);}
+  .drive{display:flex;align-items:center;gap:7px;color:#8a97a0;font-size:14px;font-weight:700;margin:0 0 6px 48px;}
+  .lunch{background:#fff5dc;border:2px dashed var(--sand-deep);color:#a8732a;border-radius:14px;padding:10px 13px;font-size:14px;font-weight:700;margin:0 0 6px 48px;}
+
+  /* ---- 기도문 ---- */
+  .pray-card{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:20px;margin-bottom:16px;}
+  .pray-card h3{font-size:19px;color:var(--sea-deep);margin:0 0 2px;}
+  .pray-card .by{font-size:13px;color:#8a97a0;margin:0 0 13px;}
+  .pray-text{font-size:17px;line-height:1.95;color:var(--ink);}
+  .pray-amen{display:block;text-align:right;font-weight:800;color:var(--coral);margin-top:10px;}
+  .pray-box{
+    background:linear-gradient(165deg,#2f6e88,#274f63);color:#fff;border-radius:20px;
+    padding:20px;margin:16px 0;font-size:16px;line-height:1.9;
+  }
+  .pray-box h4{margin:0 0 10px;font-size:16px;opacity:.92;font-weight:800;}
+  .pray-box .amen{display:block;text-align:right;font-weight:800;margin-top:8px;opacity:.95;}
+
+  /* ---- 선생님 기록 ---- */
+  .t-summary{font-size:16px;font-weight:800;color:var(--sea-deep);margin:0 4px 12px;}
+  .t-wrap{overflow-x:auto;border:2px solid var(--line);border-radius:16px;background:var(--card);}
+  .t-table{width:100%;border-collapse:collapse;font-size:15px;}
+  .t-table th{background:var(--sea-light);color:var(--sea-deep);font-weight:800;padding:11px 8px;text-align:center;white-space:nowrap;}
+  .t-table td{padding:11px 8px;text-align:center;border-top:1px solid var(--line);white-space:nowrap;}
+  .t-table td.nm{text-align:left;font-weight:800;color:var(--ink);}
+  .t-table td.tm{color:#8a97a0;font-size:13px;}
+  .t-table .ok{color:var(--green);font-weight:900;font-size:18px;}
+  .t-table .no{color:#cfd8dc;font-weight:900;}
+  .setup-note{background:#fff5dc;border:2px solid var(--sand-deep);border-radius:16px;padding:16px;font-size:15px;line-height:1.7;color:#7a5a1e;}
+  .setup-note code{background:#fff;border:1px solid var(--sand-deep);border-radius:6px;padding:1px 6px;font-size:13px;}
+
+  /* ---- 다른 성지 2열 그리드 ---- */
+  .more-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .more-card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 10px;cursor:pointer;text-align:center;}
+  .more-card:active{transform:scale(.97);}
+  .more-card .num{font-size:34px;}
+  .more-card b{display:block;font-size:15px;color:var(--sea-deep);margin-top:4px;line-height:1.3;min-height:38px;}
+  .more-card .ministamp{margin:8px auto 0;width:44px;height:44px;border-radius:50%;border:2px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:#b9a987;text-align:center;line-height:1.1;font-weight:700;}
+  .more-card .ministamp.done{border:2px solid var(--coral);color:var(--coral);font-size:22px;transform:rotate(-10deg);background:rgba(233,111,77,.08);}
+  /* ---- 나만의 순례 코스 ---- */
+  .course-drop{background:#eef2f0;border:none;border-radius:12px;color:#5a6b62;font-size:13px;font-weight:800;padding:8px 11px;cursor:pointer;font-family:inherit;margin-left:6px;}
+  .course-add{margin-left:auto;border:none;border-radius:12px;font-size:14px;font-weight:800;padding:9px 13px;cursor:pointer;font-family:inherit;background:var(--sea-deep);color:#fff;}
+  .course-add:disabled{background:#cfd8dc;color:#fff;}
+
+  /* ---- 대문(스플래시) ---- */
+  #splash{position:fixed;inset:0;z-index:1000;background:#163b5c;color:#fff;
+    display:flex;align-items:center;justify-content:center;padding:34px;}
+  .splash-inner{max-width:560px;text-align:center;animation:fade .5s ease;}
+  .splash-mark{font-size:44px;opacity:.85;margin-bottom:22px;}
+  .splash-quote{font-size:26px;font-weight:800;line-height:1.55;letter-spacing:-.5px;word-break:keep-all;}
+  .splash-by{font-size:16px;opacity:.75;margin-top:18px;font-weight:700;}
+  .splash-btn{margin-top:38px;background:#fff;color:#163b5c;border:none;border-radius:18px;
+    font-family:inherit;font-size:19px;font-weight:800;padding:16px 30px;cursor:pointer;}
+  .splash-btn:active{transform:scale(.97);}
+</style>
+</head>
+<body>
+
+<!-- ===================== 대문 ===================== -->
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-mark">✝️</div>
+    <div class="splash-quote" id="splashQuote">…</div>
+    <div class="splash-by" id="splashBy"></div>
+    <button class="splash-btn" onclick="enterApp()">순례 시작하기 →</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ===================== HOME ===================== -->
+  <section id="home" class="screen active">
+    <div class="cover">
+      <div class="boat">⛵</div>
+      <h1>제주 순례여권</h1>
+      <p>제주 신앙 선조들의 숨결과 발자취를 따라 믿음을 키워요</p>
+      <div class="namebox">
+        <span>이름</span>
+        <input id="nameInput" placeholder="여기에 적어요" maxlength="8">
+      </div>
+    </div>
+
+    <button class="route-cta" style="background:linear-gradient(120deg,#2f7d4f,#3f9c63)" onclick="go('course')">
+      <span class="ic">🧭</span>
+      <div><b>나만의 순례 일정 짜기</b><small>가고 싶은 성지를 골라 순서대로</small></div>
+      <span class="go">▶</span>
+    </button>
+
+    <button class="route-cta" style="background:linear-gradient(120deg,#b3562f,#e0834a)" onclick="go('troop')">
+      <span class="ic">🔔</span>
+      <div><b>순례단 · 알림</b><small>순례단을 만들거나 들어가 알림을 받아요</small></div>
+      <span class="go">▶</span>
+    </button>
+
+    <!-- 일정 확정 후: 순례 도장 -->
+    <div id="sec-stamp" style="display:none">
+      <div class="section-label order-head">📕 순례 도장 — <span id="stampCount">3</span>곳 모으기
+        <button id="orderToggle" class="order-toggle" onclick="toggleOrder()">↕ 순서 바꾸기</button>
+      </div>
+      <div id="site-list"></div>
+      <button class="route-cta" onclick="go('route')">
+        <span class="ic">🗺️</span>
+        <div><b>오늘의 순례길</b><small id="routeSub">8월 8일 · 남원 → 세 성지 순서와 시간</small></div>
+        <span class="go">▶</span>
+      </button>
+    </div>
+
+    <!-- 일정 확정 전: 제주도 성지 -->
+    <div id="sec-all" style="display:none">
+      <div class="section-label">🗺️ 제주도 성지</div>
+      <div id="allsites-list"></div>
+    </div>
+
+    <!-- 일정 확정 후: 제주도 다른 성지 -->
+    <div id="sec-other" style="display:none">
+      <div class="section-label">🗺️ 제주도 다른 성지</div>
+      <div id="more-list"></div>
+    </div>
+
+    <!-- 일정 확정 후: 순례 길 가는 길 -->
+    <div id="sec-bonus" style="display:none">
+      <div class="section-label">🚶 순례 길 — 가는 길에 틈틈이</div>
+      <div class="bonus" onclick="go('van')">
+        <div class="num">🚐</div>
+        <div><b>가는 길 ① 창밖 빙고</b><small>봉고차에서 제주 풍경을 찾아봐요</small></div>
+      </div>
+      <div class="bonus" onclick="go('memory')">
+        <div class="num">🃏</div>
+        <div><b>가는 길 ② 순례 기억력 카드</b><small>같은 그림 짝을 찾아요</small></div>
+        <span class="seal" id="memory-seal"></span>
+      </div>
+      <div class="bonus" onclick="go('match')">
+        <div class="num">🧩</div>
+        <div><b>가는 길 ③ 누구의 이야기일까?</b><small>순례한 성지의 인물을 맞혀요</small></div>
+        <span class="seal" id="match-seal"></span>
+      </div>
+    </div>
+
+    <button class="reset" onclick="openTeacher()">📋 순례 기록 보기 (admin용)</button>
+    <button class="reset" onclick="resetAll()">처음부터 다시 시작 (admin용)</button>
+  </section>
+
+  <!-- ===================== 다른 성지 상세 ===================== -->
+  <section id="moredetail" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2 id="more-title">성지</h2></div>
+    <div id="more-body"></div>
+  </section>
+
+  <!-- ===================== 나만의 순례 코스 ===================== -->
+  <section id="course" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🧭 나만의 순례 코스</h2></div>
+    <div id="course-body"></div>
+  </section>
+  <section id="mycourse" class="screen">
+    <div class="topbar"><button class="back" onclick="go('course')">←</button><h2>📖 내 순례 코스</h2></div>
+    <div id="mycourse-body"></div>
+  </section>
+
+  <!-- ===================== 순례단 · 알림 ===================== -->
+  <section id="troop" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🔔 순례단 · 알림</h2></div>
+    <div id="troop-body"></div>
+  </section>
+
+  <!-- ===================== 오늘의 길 ===================== -->
+  <section id="route" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🗺️ 오늘의 순례길</h2></div>
+    <div class="trip-edit">
+      <div class="trip-now">📅 <b id="tripWhen">—</b></div>
+      <button class="order-toggle" onclick="editTrip()">✏️ 바꾸기</button>
+      <div id="tripForm" class="trip-form">
+        <label>날짜 <input type="date" id="tripDate"></label>
+        <label>출발 시각 <input type="time" id="tripTime"></label>
+        <button class="big-next" onclick="saveTrip()">저장</button>
+      </div>
+    </div>
+    <p class="route-day" id="routeDay">—</p>
+    <div id="route-timeline"></div>
+    <div class="pray-card" style="margin-top:18px">
+      <h3>🙏 순례 시작 기도</h3>
+      <div class="by">출발 전에 다 함께</div>
+      <div class="pray-text">
+        하느님,<br>
+        오늘 저희가 김대건 신부님과<br>
+        여러 성인의 길을 따라 순례를 떠납니다.<br>
+        가는 길을 지켜 주시고,<br>
+        보고 듣는 것마다<br>
+        하느님을 더 사랑하는 마음을 키우게 하소서.<br>
+        함께 가는 친구들과 선생님 모두<br>
+        안전하고 기쁘게 하소서.<br>
+        우리 주 그리스도를 통하여 비나이다.
+        <span class="pray-amen">아멘.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== YONGSU ===================== -->
+  <section id="yongsu" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>⛵ 용수성지</h2></div>
+    <div class="intro-card">
+      <span class="em">🌊</span>
+      <strong>김대건 신부님</strong>은 멀리 중국에서 신부님이 되어 배를 타고 돌아오다가,
+      큰 풍랑을 만나 바로 이곳 <strong>용수리</strong>에 닿으셨어요.
+      그때 타고 온 배가 <strong>라파엘호</strong>예요. 마당에 똑같이 만든 배가 있어요!
+    </div>
+    <button class="menu-btn" onclick="go('yongsu_ox')">
+      <span class="ic">💡</span><div class="t"><b>김대건 신부님 골든벨</b><small>O · X 여덟 문제</small></div>
+      <span class="chk" id="chk-yongsu_ox"></span>
+    </button>
+    <button class="menu-btn" onclick="go('yongsu_bingo')">
+      <span class="ic">📸</span><div class="t"><b>성지 사진 빙고</b><small>눈으로 찾아 탭하기 (6개 이상)</small></div>
+      <span class="chk" id="chk-yongsu_bingo"></span>
+    </button>
+    <button class="menu-btn" onclick="go('yongsu_boat')">
+      <span class="ic">🛶</span><div class="t"><b>종이배 기도 미션</b><small>선생님과 함께하는 활동</small></div>
+    </button>
+    <div class="pray-card" style="margin-top:6px">
+      <h3>🙏 성 김대건 안드레아 사제 기도문</h3>
+      <div class="by">한국인 첫 사제 · 용수성지에 표착하신 분</div>
+      <div class="pray-text">
+        진리의 근원이신 하느님,<br>
+        성 김대건 안드레아 사제가<br>
+        당신 사랑에 응답하여 순교로<br>
+        당신의 영광을 드러내게 하셨으니,<br>
+        저희도 “용기를 내어라” 하신<br>
+        당신의 말씀을 따라<br>
+        모든 두려움을 이겨내고<br>
+        뜨거운 사랑으로 그리스도를<br>
+        담대히 증거하게 하소서.
+        <span class="pray-amen">아멘.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- YONGSU sub: OX -->
+  <section id="yongsu_ox" class="screen">
+    <div class="topbar"><button class="back" onclick="go('yongsu')">←</button><h2>김대건 신부님 골든벨</h2></div>
+    <div id="box-yongsu_ox"></div>
+  </section>
+  <!-- YONGSU sub: bingo -->
+  <section id="yongsu_bingo" class="screen">
+    <div class="topbar"><button class="back" onclick="go('yongsu')">←</button><h2>성지 사진 빙고</h2></div>
+    <p class="bingo-hint">성지 안에서 찾으면 칸을 탭! 6개 이상 찾으면 도장을 받아요.</p>
+    <div id="box-yongsu_bingo"></div>
+  </section>
+  <!-- YONGSU sub: boat -->
+  <section id="yongsu_boat" class="screen">
+    <div class="topbar"><button class="back" onclick="go('yongsu')">←</button><h2>종이배 기도 미션</h2></div>
+    <div class="intro-card">
+      <span class="em">🛶</span>
+      김대건 신부님은 무서운 풍랑 속에서도 끝까지 포기하지 않으셨어요.<br><br>
+      ① 종이로 작은 배를 접어요.<br>
+      ② 배 위에 내 <strong>소원</strong>이나 <strong>기도</strong>를 한 줄 적어요.<br>
+      ③ 다 같이 모아 보고, 신부님처럼 용기를 달라고 기도해요.
+    </div>
+    <p class="bingo-hint">선생님과 함께하는 활동이에요. 끝나면 아래 버튼을 눌러요.</p>
+    <div class="pray-box">
+      <h4>🙏 다 함께 — 성 김대건 안드레아 사제 기도문</h4>
+      진리의 근원이신 하느님,<br>
+      성 김대건 안드레아 사제가 당신 사랑에 응답하여<br>
+      순교로 당신의 영광을 드러내게 하셨으니,<br>
+      저희도 “용기를 내어라” 하신 당신의 말씀을 따라<br>
+      모든 두려움을 이겨내고 뜨거운 사랑으로<br>
+      그리스도를 담대히 증거하게 하소서.
+      <span class="amen">아멘.</span>
+    </div>
+    <button class="big-next gold" onclick="markBoat()">✏️ 미션을 마쳤어요</button>
+  </section>
+
+  <!-- ===================== DAEJEONG ===================== -->
+  <section id="daejeong" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🌿 대정성지</h2></div>
+    <div class="intro-card">
+      <span class="em">🕊️</span>
+      오래 전, <strong>정난주 마리아님</strong>은 믿음을 지킨다는 이유로 머나먼 제주까지 오게 되었어요.
+      추자도에서 어린 아들과 헤어지는 큰 슬픔도 겪으셨지요.
+      그래도 이곳에서 <strong>37년 동안</strong> 한결같이 기도하며, 이웃에게 따뜻한 사람으로 사셨어요.
+    </div>
+    <p class="bingo-hint">여기는 묘소예요. 뛰지 않고 <strong>조용히</strong> 마음으로 해요. 마음 미션을 하나씩 탭해요.</p>
+    <div class="mission" onclick="toggleMission(this,0)"><div class="box">✓</div><span>묘소 앞에서 두 손을 모으고 인사해요</span></div>
+    <div class="mission" onclick="toggleMission(this,1)"><div class="box">✓</div><span>우리 가족 중 고마운 사람 한 명을 떠올려요</span></div>
+    <div class="mission" onclick="toggleMission(this,2)"><div class="box">✓</div><span>내가 끝까지 지키고 싶은 것 한 가지를 생각해요</span></div>
+    <div class="prayer">
+      <div class="em">🙏</div>
+      “정난주 마리아님처럼,<br>어려울 때에도 마음을 지키게 해 주세요.”<br>
+      <small style="opacity:.8;">다 함께 조용히 기도해요.</small>
+    </div>
+    <div class="pray-box">
+      <h4>🕯️ 정난주 마리아를 위한 기도문</h4>
+      하느님,<br>
+      정난주 마리아처럼 박해와 유배 속에서도<br>
+      믿음을 굳건히 지키는 용기를 주옵시며,<br>
+      정난주 마리아가 제주에서 가르치고 봉사하듯<br>
+      저희도 이웃을 사랑하고 돕는 삶을 살게 하소서.<br>
+      또한 대정성지의 고요한 기도 분위기 속에서<br>
+      제 마음의 상처를 치유하시고 평안을 주시옵고,<br>
+      이 순례가 제 삶의 신앙을 돌아보게 하는 시간이 되게 하시고<br>
+      주님의 평화가 함께하시길 기도합니다.
+      <span class="amen">아멘.</span>
+    </div>
+    <button class="big-next gold" id="daejeong-btn" disabled onclick="markDaejeong()">함께 기도했어요 🕯️</button>
+    <button class="menu-btn" style="margin-top:14px" onclick="go('daejeong_ox')">
+      <span class="ic">🌿</span><div class="t"><b>정난주 마리아님 OX</b><small>조용히 풀어보는 네 문제 (선택)</small></div>
+      <span class="chk" id="chk-daejeong_ox"></span>
+    </button>
+  </section>
+
+  <!-- 대정 조용한 OX -->
+  <section id="daejeong_ox" class="screen">
+    <div class="topbar"><button class="back" onclick="go('daejeong')">←</button><h2>🌿 정난주 마리아님 OX</h2></div>
+    <p class="bingo-hint">묘소 앞이니 조용히, 마음으로 답을 떠올리며 풀어요.</p>
+    <div id="box-daejeong_ox"></div>
+  </section>
+
+  <!-- ===================== HALLIM ===================== -->
+  <section id="hallim" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🐑 한림 임피제-임승필 사제 기념관</h2></div>
+    <div class="intro-card">
+      <span class="em">🐷🐑🐄</span>
+      먼 나라 <strong>아일랜드</strong>에서 온 <strong>임피제 신부님</strong>은,
+      가난했던 제주에 돼지 한 마리로 시작해 큰 목장을 만들고,
+      병원·요양원·유치원까지 세워 이웃을 도우셨어요. 황무지를 푸른 풀밭으로 바꾸셨답니다!<br><br>
+      이곳에는 <strong>임승필 신부님</strong>도 함께 모셔요. 한림에서 태어난 임승필 신부님은
+      어려운 <strong>성경</strong>을 우리말로 옮기는 일에 평생을 바치셨어요.
+      우리가 한글 성경을 읽을 수 있는 건 신부님 덕분이랍니다! 📖
+    </div>
+    <button class="menu-btn" onclick="go('hallim_gift')">
+      <span class="ic">🎁</span><div class="t"><b>신부님의 선물 찾기</b><small>제주에 주신 것 O / 아닌 것 X</small></div>
+      <span class="chk" id="chk-hallim_gift"></span>
+    </button>
+    <button class="menu-btn" onclick="go('hallim_quote')">
+      <span class="ic">💬</span><div class="t"><b>신부님의 명대사</b><small>빈칸을 맞혀요</small></div>
+      <span class="chk" id="chk-hallim_quote"></span>
+    </button>
+    <button class="menu-btn" onclick="go('hallim_ox')">
+      <span class="ic">💡</span><div class="t"><b>두 신부님 골든벨</b><small>임피제·임승필 · O·X 여섯 문제</small></div>
+      <span class="chk" id="chk-hallim_ox"></span>
+    </button>
+    <button class="menu-btn" onclick="go('hallim_journey')">
+      <span class="ic">📖</span><div class="t"><b>성경이 우리말이 되기까지</b><small>임승필 신부님 · 한 장씩 넘겨 보는 이야기</small></div>
+      <span class="chk" id="chk-hallim_journey"></span>
+    </button>
+  </section>
+
+  <section id="hallim_gift" class="screen">
+    <div class="topbar"><button class="back" onclick="go('hallim')">←</button><h2>신부님의 선물 찾기</h2></div>
+    <div id="box-hallim_gift"></div>
+  </section>
+  <section id="hallim_quote" class="screen">
+    <div class="topbar"><button class="back" onclick="go('hallim')">←</button><h2>신부님의 명대사</h2></div>
+    <div class="q-card">신부님이 제주에 처음 오셨을 때 하신 말!<br><br>“나는 미국 놈 아니에요,<br>______ 놈이에요!”</div>
+    <button class="choice" onclick="quoteAns(this,true)">아일랜드</button>
+    <button class="choice" onclick="quoteAns(this,false)">영국</button>
+    <button class="choice" onclick="quoteAns(this,false)">중국</button>
+    <div class="feedback" id="quote-fb"></div>
+  </section>
+  <section id="hallim_ox" class="screen">
+    <div class="topbar"><button class="back" onclick="go('hallim')">←</button><h2>두 신부님 골든벨</h2></div>
+    <div id="box-hallim_ox"></div>
+  </section>
+  <section id="hallim_journey" class="screen">
+    <div class="topbar"><button class="back" onclick="go('hallim')">←</button><h2>성경이 우리말이 되기까지</h2></div>
+    <div id="box-hallim_journey"></div>
+  </section>
+
+  <!-- ===================== VAN ===================== -->
+  <section id="van" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🚐 창밖 빙고</h2></div>
+    <p class="bingo-hint">봉고차 창밖에서 보이면 탭! 누가 먼저 6개를 찾을까요?</p>
+    <div id="box-van"></div>
+  </section>
+
+  <!-- ===================== BONUS: 기억력 카드 ===================== -->
+  <section id="memory" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🃏 순례 기억력 카드</h2></div>
+    <p class="bingo-hint">카드를 두 장 뒤집어 같은 그림을 찾아요. 다 맞히면 끝!</p>
+    <div id="box-memory"></div>
+  </section>
+
+  <!-- ===================== BONUS: 누구의 이야기일까 ===================== -->
+  <section id="match" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🧩 누구의 이야기일까?</h2></div>
+    <div id="box-match"></div>
+  </section>
+
+  <!-- ===================== 선생님 기록 ===================== -->
+  <section id="teacher" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>📋 순례 기록</h2></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="act nav" style="border:none;cursor:pointer;font-family:inherit" onclick="loadTeacher()">🔄 새로고침</button>
+    </div>
+    <div id="box-teacher"></div>
+  </section>
+
+  <!-- ===================== ALL DONE ===================== -->
+  <section id="done" class="screen">
+    <div class="celebrate">
+      <div class="big">🏆⛵🐑</div>
+      <h2>순례 여권 완성!</h2>
+      <p>세 성지의 도장을 모두 모았어요.<br>우리 제주에 담긴 믿음을 따라 잘 걸었어요!</p>
+    </div>
+    <button class="big-next" style="margin-top:20px" onclick="go('home')">여권 다시 보기 📕</button>
+  </section>
+
+</div>
+
+<!-- 순례 기록 클라우드 저장(선택): Firebase. 인터넷이 있을 때만 동기화돼요. -->
+<script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging-compat.js"></script>
+
+<script>
+/* ---------------- state ---------------- */
+var KEY='pilgrim_v1';
+var state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
+try{var s=localStorage.getItem(KEY);if(s)state=Object.assign(state,JSON.parse(s));}catch(e){}
+(function(){var def=['yongsu','daejeong','hallim'];
+  if(!Array.isArray(state.order)||state.order.length!==3||def.some(function(k){return state.order.indexOf(k)<0;}))state.order=def.slice();
+  if(!Array.isArray(state.myCourse)||!state.myCourse.length)state.myCourse=def.slice();})();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}cloudSave();}
+
+/* ============ 순례 기록 클라우드(Firebase) ============ */
+/* 사용하려면 아래 FIREBASE_CONFIG에 본인 프로젝트 설정을 붙여넣고,
+   TEACHER_PIN을 원하는 숫자로 바꾸세요. 비워두면 이 기기 안에서만 저장됩니다. */
+var FIREBASE_CONFIG={
+  apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
+  authDomain: "jeju-pilgrimage-653d9.firebaseapp.com",
+  projectId: "jeju-pilgrimage-653d9",
+  storageBucket: "jeju-pilgrimage-653d9.firebasestorage.app",
+  messagingSenderId: "861297947695",
+  appId: "1:861297947695:web:f52e64a53da2eda4be02da"
+};
+var TEACHER_PIN="1234";
+// 순례 알림(FCM)용 웹푸시 인증서 키: Firebase 콘솔 → 프로젝트 설정 → 클라우드 메시징 → 웹 푸시 인증서
+var VAPID_KEY="BNxEqMBg6Tz0MKFfifnZL4cFHcTbBUsn1XMBXzSzfOjPvvi9_0iRDgDj2QBkvMO9hyo2eYmxTKDWoUxtolB2Ioc";
+
+var cloudDb=null;
+function initCloud(){
+  if(cloudDb)return true;
+  if(typeof firebase==='undefined'||!FIREBASE_CONFIG.apiKey)return false;
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+    cloudDb=firebase.firestore();
+    return true;
+  }catch(e){return false;}
+}
+function pkey(name){return (name||'').replace(/[^\w가-힣]/g,'_').slice(0,40)||'익명';}
+var cloudTimer=null;
+function cloudSave(){
+  if(!initCloud()||!state.name)return;
+  clearTimeout(cloudTimer);
+  cloudTimer=setTimeout(function(){
+    try{
+      cloudDb.collection('pilgrims').doc(pkey(state.name)).set({
+        name:state.name,done:state.done,missions:state.missions,updatedAt:Date.now()
+      },{merge:true});
+    }catch(e){}
+  },1200);
+}
+
+function go(id){
+  document.querySelectorAll('.screen').forEach(function(el){el.classList.remove('active');});
+  var el=document.getElementById(id);el.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='yongsu_ox')renderOX('yongsu_ox',YONGSU_OX,'box-yongsu_ox');
+  if(id==='hallim_ox')renderOX('hallim_ox',HALLIM_OX,'box-hallim_ox');
+  if(id==='daejeong_ox')renderOX('daejeong_ox',DAEJEONG_OX,'box-daejeong_ox');
+  if(id==='hallim_journey')renderJourney();
+  if(id==='route')renderRoute();
+  if(id==='home')layoutHome();
+  if(id==='course')renderCourse();
+  if(id==='mycourse')renderMyCourse();
+  if(id==='troop')renderTroop();
+  if(id==='memory')renderMemory();
+  if(id==='match')renderMatch();
+  if(id==='yongsu_bingo')renderBingo('box-yongsu_bingo',YONGSU_BINGO,'yongsu_bingo',true);
+  if(id==='van')renderBingo('box-van',VAN_BINGO,'van',false);
+  if(id==='hallim_gift')renderGift();
+  refresh();
+}
+
+/* ---------------- home refresh ---------------- */
+function siteComplete(site){
+  if(site==='yongsu')return state.done.yongsu_ox&&state.done.yongsu_bingo;
+  if(site==='daejeong')return state.done.daejeong;
+  if(site==='hallim')return state.done.hallim_gift&&state.done.hallim_quote&&state.done.hallim_ox;
+}
+/* ---------------- 순례 일시 & 길 ---------------- */
+var ROUTE=[
+  {type:'stop',dot:'출',label:'출발',name:'남원 자비의 예수 성당',note:'물·모자·여분 간식을 챙겨 출발해요. 더운 날은 더위 대비가 가장 중요합니다.',tel:'0647641712',telLabel:'064-764-1712',map:'남원자비의예수성당',lat:33.283265,lng:126.7157415,stay:0},
+  {type:'drive',label:'약 55분 (남쪽 해안로)',min:55},
+  {type:'stop',dot:'1',name:'대정성지 (정난주 마리아 묘)',note:'진입로가 좁아 봉고차는 천천히! 주차장은 넓어요. 묘소라 뛰지 않고 조용히 묵상하는 곳이에요.',map:'대정성지정난주마리아묘',lat:33.2541237,lng:126.2611793,stay:35},
+  {type:'drive',label:'약 30분 (서쪽 해안로)',min:30},
+  {type:'stop',dot:'2',name:'용수성지 · 성 김대건 신부 표착기념관',note:'복원된 라파엘호와 전망대가 있어 게임하기 좋아요. 월요일 빼고 오전 11시 순례 미사가 있고, 기념관은 9시~18시예요.',tel:'0647721252',telLabel:'064-772-1252',map:'용수성지표착기념관',lat:33.3228619,lng:126.1677363,stay:60},
+  {type:'lunch',label:'점심 + 이동 (약 1시간 15분) · 고산 또는 한림 시내',min:75},
+  {type:'stop',dot:'3',name:'한림 임피제·임승필 기념관 (한림성당)',note:"두 신부님을 기리는 곳이에요. 시간이 남으면 '임피제 기적의 길' 짧은 코스(무장애)도 걸을 수 있어요.",tel:'0647964044',telLabel:'064-796-4044',map:'한림성당',lat:33.4175625,lng:126.2657801,stay:60},
+  {type:'drive',label:'약 1시간 15분 (남원으로 복귀)',min:75},
+  {type:'stop',dot:'✓',name:'남원 도착 · 순례 마침',note:'길 위에서는 카카오내비·티맵으로 실시간 시간을 확인하세요. 모두 안전하게 다녀오길!',end:true,stay:0}
+];
+function parseDepart(){var t=(state.departTime||'09:10').split(':');return new Date(2000,0,1,parseInt(t[0],10)||0,parseInt(t[1],10)||0);}
+function fmtTime(d){var h=d.getHours(),m=d.getMinutes(),ap=h<12?'오전':'오후',hh=h%12;if(hh===0)hh=12;return ap+' '+hh+':'+('0'+m).slice(-2);}
+function dateText(){
+  var p=(state.tripDate||'2026-08-08').split('-');
+  var d=new Date(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10));
+  var w=['일','월','화','수','목','금','토'][d.getDay()];
+  return (d.getMonth()+1)+'월 '+d.getDate()+'일 '+w+'요일';
+}
+function renderRoute(){
+  var box=document.getElementById('route-timeline');
+  if(box){
+    var cur=parseDepart(),html='';
+    ROUTE.forEach(function(it){
+      if(it.type==='drive'){html+='<div class="drive">🚐 '+it.label+'</div>';cur=new Date(cur.getTime()+it.min*60000);return;}
+      if(it.type==='lunch'){html+='<div class="lunch">🍚 '+it.label+'</div>';cur=new Date(cur.getTime()+it.min*60000);return;}
+      var arrive=new Date(cur.getTime()),chip;
+      if(it.label==='출발')chip=fmtTime(arrive)+' 출발';
+      else if(it.end)chip=fmtTime(arrive)+' 무렵 도착';
+      else chip=fmtTime(arrive)+' 도착'+(it.stay?' · '+it.stay+'분':'');
+      cur=new Date(cur.getTime()+(it.stay||0)*60000);
+      var act='';
+      if(it.tel)act+='<a class="act" href="tel:'+it.tel+'">전화 '+it.telLabel+'</a>';
+      if(it.map)act+='<a class="act nav" target="_blank" rel="noopener" href="https://map.kakao.com/link/to/'+it.map+','+it.lat+','+it.lng+'">길찾기</a>';
+      var line=it.end?'':'<div class="line"></div>';
+      html+='<div class="stop'+(it.end?' end':'')+'"><div class="rail"><div class="dot">'+it.dot+'</div>'+line+'</div>'
+        +'<div class="body"><span class="time-chip">'+chip+'</span>'
+        +'<div class="stop-card"><b>'+it.name+'</b><div class="note">'+it.note+'</div>'
+        +(act?'<div class="stop-actions">'+act+'</div>':'')+'</div></div></div>';
+    });
+    box.innerHTML=html;
+  }
+  var dt=dateText(),tm=fmtTime(parseDepart());
+  var rd=document.getElementById('routeDay');if(rd)rd.textContent=dt+' · 남원 출발 → 서부 성지 한 바퀴 (운전 약 3시간)';
+  var tw=document.getElementById('tripWhen');if(tw)tw.textContent=dt+' · '+tm+' 출발';
+  var rs=document.getElementById('routeSub');if(rs)rs.textContent=dt.replace(/ .요일$/,'')+' · 남원 → 세 성지 순서와 시간';
+}
+function editTrip(){
+  var f=document.getElementById('tripForm');
+  var open=getComputedStyle(f).display==='none';
+  if(open){document.getElementById('tripDate').value=state.tripDate||'2026-08-08';document.getElementById('tripTime').value=state.departTime||'09:10';}
+  f.style.display=open?'flex':'none';
+}
+function saveTrip(){
+  var d=document.getElementById('tripDate').value,t=document.getElementById('tripTime').value;
+  if(d)state.tripDate=d;
+  if(t)state.departTime=t;
+  save();
+  document.getElementById('tripForm').style.display='none';
+  renderRoute();
+}
+
+/* ---------------- 순례지 순서 ---------------- */
+var SITE_META={
+  yongsu:{emoji:'⛵',name:'용수성지',desc:'김대건 신부님이 배를 타고 닿은 곳'},
+  daejeong:{emoji:'🌿',name:'대정성지',desc:'정난주 마리아님의 묘 · 조용히 기도하는 곳'},
+  hallim:{emoji:'🐑',name:'한림 임피제-임승필 사제 기념관',desc:'제주를 푸르게 바꾼 신부님'}
+};
+var orderMode=false;
+function siteDone(key){
+  return COURSE_META[key].type==='main'?siteComplete(key):!!state.done['more_'+key];
+}
+function renderSites(){
+  var box=document.getElementById('site-list');if(!box)return;
+  var list=state.myCourse||[];
+  var cnt=document.getElementById('stampCount');if(cnt)cnt.textContent=list.length;
+  if(!list.length){box.innerHTML='<p class="bingo-hint">아직 순례 장소를 정하지 않았어요. 아래 ‘나만의 순례 코스 짜기’에서 골라 담아요.</p>';return;}
+  var html='';
+  list.forEach(function(key,i){
+    var m=COURSE_META[key];
+    var open=m.type==='main'?"go('"+key+"')":"openMore('"+key+"')";
+    var ctrl=orderMode
+      ? '<div class="reorder">'
+        +'<button onclick="moveSiteC(event,'+i+',-1)" '+(i===0?'disabled':'')+'>▲</button>'
+        +'<button onclick="moveSiteC(event,'+i+',1)" '+(i===list.length-1?'disabled':'')+'>▼</button></div>'
+      : '<div class="stamp" id="stamp-'+key+'">아직<br>안 찍음</div>';
+    html+='<div class="site" onclick="'+(orderMode?'':open)+'">'
+      +'<div class="num">'+m.emoji+'</div>'
+      +'<div class="info"><b>'+m.title+'</b><small>'+m.desc+'</small></div>'
+      +ctrl+'</div>';
+  });
+  box.innerHTML=html;
+  if(!orderMode)refresh();
+}
+function moveSiteC(ev,i,dir){
+  ev.stopPropagation();
+  var a=state.myCourse,j=i+dir;if(j<0||j>=a.length)return;
+  var t=a[i];a[i]=a[j];a[j]=t;save();renderSites();
+}
+function toggleOrder(){
+  orderMode=!orderMode;
+  var btn=document.getElementById('orderToggle');
+  if(btn){btn.classList.toggle('on',orderMode);btn.textContent=orderMode?'✓ 순서 완료':'↕ 순서 바꾸기';}
+  renderSites();
+}
+
+function refresh(){
+  (state.myCourse||[]).forEach(function(key){
+    var st=document.getElementById('stamp-'+key);if(!st)return;
+    if(siteDone(key)){st.classList.add('done');st.innerHTML='✓';}
+    else{st.classList.remove('done');st.innerHTML='아직<br>안 찍음';}
+  });
+  setChk('chk-yongsu_ox',state.done.yongsu_ox);
+  setChk('chk-yongsu_bingo',state.done.yongsu_bingo);
+  setChk('chk-daejeong_ox',state.done.daejeong_ox);
+  setChk('chk-hallim_gift',state.done.hallim_gift);
+  setChk('chk-hallim_quote',state.done.hallim_quote);
+  setChk('chk-hallim_ox',state.done.hallim_ox);
+  setChk('chk-hallim_journey',state.done.hallim_journey);
+  var ms=document.getElementById('memory-seal');if(ms)ms.textContent=state.done.memory?'⭐':'';
+  var mt=document.getElementById('match-seal');if(mt)mt.textContent=state.done.match?'⭐':'';
+  var db=document.getElementById('daejeong-btn');
+  if(db)db.disabled=!(state.missions[0]&&state.missions[1]&&state.missions[2]);
+}
+function setChk(id,on){var e=document.getElementById(id);if(e)e.textContent=on?'✓':'';}
+
+function checkAllDone(){
+  var sel=state.myCourse||[];
+  if(sel.length&&sel.every(function(k){return siteDone(k);})){
+    setTimeout(function(){go('done');confetti();},500);
+  }
+}
+
+/* ---------------- OX quiz ---------------- */
+var YONGSU_OX=[
+  {q:'김대건 신부님은 배를 타고 제주에 오셨어요.',a:true},
+  {q:'김대건 신부님이 타고 온 배 이름은 “라파엘호”예요.',a:true},
+  {q:'김대건 신부님은 제주도에서 태어나셨어요.',a:false,no:'아니에요! 신부님은 충청도에서 태어나셨어요.'},
+  {q:'김대건 신부님은 우리나라 첫 번째 한국인 신부님이세요.',a:true},
+  {q:'신부님은 큰 풍랑을 만나 용수리 바닷가에 닿으셨어요.',a:true},
+  {q:'김대건 신부님은 멀리 중국 상해에서 신부님이 되셨어요.',a:true},
+  {q:'신부님 일행은 제주에서 우리나라 첫 미사를 드렸어요.',a:true},
+  {q:'용수성지에는 똑같이 만든 라파엘호 배가 전시되어 있어요.',a:true}
+];
+var DAEJEONG_OX=[
+  {q:'대정성지에는 정난주 마리아님의 묘가 있어요.',a:true},
+  {q:'정난주 마리아님은 제주에서 오래오래 믿음을 지키셨어요.',a:true},
+  {q:'정난주 마리아님은 어려움 때문에 믿음을 곧 버리셨어요.',a:false,no:'아니에요! 정난주 마리아님은 끝까지 믿음을 지키셨어요.'},
+  {q:'대정 사람들은 정난주 마리아님을 “한양 할머니”라 부르며 잘 모셨어요.',a:true}
+];
+var HALLIM_OX=[
+  {q:'임피제 신부님은 아일랜드에서 오셨어요.',a:true},
+  {q:'임피제 신부님은 제주에 큰 목장을 만드셨어요.',a:true},
+  {q:'임승필 신부님은 제주 한림에서 태어나셨어요.',a:true},
+  {q:'임승필 신부님은 어려운 성경을 우리말로 옮기는 일을 하셨어요.',a:true},
+  {q:'임승필 신부님은 그림을 그리는 화가셨어요.',a:false,no:'아니에요! 임승필 신부님은 성경을 우리말로 번역하신 분이에요.'},
+  {q:'임승필 신부님은 너무 열심히 일해서 “성서 늘보”라는 별명이 있었어요.',a:true}
+];
+/* ---------------- 한림(임승필): 성경 여정 ---------------- */
+var JOURNEY=[
+  {e:'📜',t:'성경은 아주 먼 옛날, 멀리 다른 나라 말로 쓰였어요.'},
+  {e:'✈️',t:'임승필 신부님은 외국에 가서 그 옛 글을 열심히 공부하셨어요.'},
+  {e:'📖',t:'그리고 한 글자 한 글자, 정성껏 <strong>우리말</strong>로 옮기셨어요.'},
+  {e:'🙏',t:'그래서 오늘 우리가 한글 성경을 읽을 수 있어요. 고맙습니다!'}
+];
+var jIdx=0;
+function renderJourney(){jIdx=0;drawJourney();}
+function drawJourney(){
+  var c=document.getElementById('box-hallim_journey');
+  if(jIdx>=JOURNEY.length){
+    c.innerHTML='<div class="journey-card"><span class="e">💜</span>'
+      +'<div>내가 좋아하는 성경 이야기나 말씀을 한 가지 떠올려 봐요.</div></div>'
+      +'<button class="big-next v-next gold" onclick="finishJourney()">다 읽었어요 📖</button>';
+    return;
+  }
+  var j=JOURNEY[jIdx];
+  var dots='';for(var i=0;i<JOURNEY.length;i++)dots+='<span class="'+(i<=jIdx?'on':'')+'"></span>';
+  c.innerHTML='<div class="journey-card"><span class="e">'+j.e+'</span><div>'+j.t+'</div></div>'
+    +'<div class="jdots">'+dots+'</div>'
+    +'<button class="big-next v-next" onclick="jIdx++;drawJourney();">'+(jIdx<JOURNEY.length-1?'다음 ▶':'마지막 장 ▶')+'</button>';
+}
+function finishJourney(){state.done.hallim_journey=true;save();go('hallim');}
+
+/* ---------------- 보너스: 기억력 카드 ---------------- */
+var MEM_FACES=[
+  {e:'⛵',l:'라파엘호'},{e:'🐑',l:'양'},{e:'✝️',l:'십자가'},
+  {e:'📿',l:'묵주'},{e:'📖',l:'성경'},{e:'🔔',l:'종'}
+];
+var memDeck=[],memUp=[],memMatched=0,memMoves=0,memLock=false;
+function renderMemory(){
+  memDeck=[];MEM_FACES.forEach(function(f,i){memDeck.push({id:i,e:f.e});memDeck.push({id:i,e:f.e});});
+  for(var i=memDeck.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=memDeck[i];memDeck[i]=memDeck[j];memDeck[j]=t;}
+  memUp=[];memMatched=0;memMoves=0;memLock=false;
+  drawMemory();
+}
+function drawMemory(){
+  var c=document.getElementById('box-memory');
+  var html='<div class="mem-stat" id="mem-stat">뒤집은 횟수 : '+memMoves+'</div><div class="mem-grid">';
+  memDeck.forEach(function(card,idx){
+    var st=card.matched?' matched':(card.open?' up':'');
+    var face=(card.open||card.matched)?card.e:'❔';
+    html+='<button class="mem-card'+st+(memLock?' lock':'')+'" onclick="flipMem('+idx+')">'+face+'</button>';
+  });
+  html+='</div>';
+  if(memMatched===MEM_FACES.length){
+    html+='<div class="finish"><div class="big">🎉</div><h3>'+memMoves+'번 만에 다 맞혔어요!</h3></div>'
+      +'<button class="big-next gold" onclick="renderMemory()">다시 하기 🔁</button>';
+  }
+  c.innerHTML=html;
+}
+function flipMem(idx){
+  if(memLock)return;
+  var card=memDeck[idx];
+  if(card.open||card.matched)return;
+  card.open=true;memUp.push(idx);
+  if(memUp.length===2){
+    memMoves++;
+    var a=memDeck[memUp[0]],b=memDeck[memUp[1]];
+    if(a.id===b.id){
+      a.matched=true;b.matched=true;memMatched++;memUp=[];drawMemory();
+      if(memMatched===MEM_FACES.length){
+        if(!state.done.memory){state.done.memory=true;save();refresh();}
+        confetti();
+      }
+    }else{
+      memLock=true;drawMemory();
+      setTimeout(function(){a.open=false;b.open=false;memUp=[];memLock=false;drawMemory();},800);
+    }
+  }else{drawMemory();}
+}
+
+/* ---------------- 보너스: 누구의 이야기일까 ---------------- */
+var PERSONS={
+  kdg:{name:'김대건 신부님',clues:['라파엘호를 타고 제주에 닿으신, 우리나라 첫 한국인 신부님은?']},
+  jnj:{name:'정난주 마리아님',clues:['머나먼 제주에서 오래오래 믿음을 지키신 분은?']},
+  ipj:{name:'임피제 신부님',clues:['양과 큰 목장으로 제주를 푸르게 바꾸신 신부님은?']},
+  isp:{name:'임승필 신부님',clues:['성경을 우리말로 옮겨 “성서 늘보”라 불린 신부님은?']},
+  giryang:{name:'김기량 펠릭스 베드로',clues:['풍랑에 표류했다가 돌아와 “제주의 첫 신자”가 되신 분은?']},
+  gyeonghan:{name:'황경한',clues:['정난주 마리아님의 아들로, 추자도에서 자란 분은?']},
+  taquet:{name:'에밀 타케 신부님',clues:['서귀포에서 제주의 꽃과 나무를 연구하고 귤나무를 가꾸신 신부님은?']}
+};
+var PERSON_BY_SITE={yongsu:['kdg'],daejeong:['jnj'],hallim:['ipj','isp'],saemi:['ipj'],giryang:['giryang'],gyeonghan:['gyeonghan'],hanon:['taquet']};
+var matchPeople=[],matchQ=[],matchIdx=0,matchScore=0;
+function buildMatch(){
+  var sel=state.myCourse||[],keys=[];
+  sel.forEach(function(s){(PERSON_BY_SITE[s]||[]).forEach(function(p){if(keys.indexOf(p)<0)keys.push(p);});});
+  if(keys.length<2)keys=Object.keys(PERSONS);        // 인물이 적으면 전체에서
+  matchPeople=keys.map(function(k){return PERSONS[k].name;});
+  matchQ=[];
+  keys.forEach(function(k,i){PERSONS[k].clues.forEach(function(c){matchQ.push({clue:c,a:i});});});
+  for(var j=matchQ.length-1;j>0;j--){var r=Math.floor(Math.random()*(j+1));var t=matchQ[j];matchQ[j]=matchQ[r];matchQ[r]=t;}
+  if(matchQ.length>6)matchQ=matchQ.slice(0,6);
+}
+function renderMatch(){buildMatch();matchIdx=0;matchScore=0;drawMatch();}
+function drawMatch(){
+  var c=document.getElementById('box-match');
+  if(matchIdx>=matchQ.length){
+    c.innerHTML='<div class="finish"><div class="big">🏅</div><h3>'+matchScore+' / '+matchQ.length+' 맞혔어요!</h3>'
+      +'<p>순례한 성지의 인물들을 잘 기억했어요.</p></div>'
+      +'<button class="big-next gold" onclick="renderMatch()">다시 하기 🔁</button>'
+      +'<button class="big-next" style="margin-top:10px" onclick="go(\'home\')">여권으로 돌아가기 📕</button>';
+    if(!state.done.match){state.done.match=true;save();refresh();}
+    return;
+  }
+  var q=matchQ[matchIdx];
+  var html='<div class="q-progress">'+(matchIdx+1)+' / '+matchQ.length+'</div>'
+    +'<div class="q-card">'+q.clue+'</div>';
+  matchPeople.forEach(function(name,i){html+='<button class="choice" onclick="ansMatch(this,'+i+','+q.a+')">'+name+'</button>';});
+  html+='<div class="feedback" id="match-fb"></div>';
+  c.innerHTML=html;
+}
+function ansMatch(btn,picked,correct){
+  document.querySelectorAll('#box-match .choice').forEach(function(b){b.style.pointerEvents='none';});
+  var fb=document.getElementById('match-fb');
+  if(picked===correct){
+    btn.classList.add('right');matchScore++;fb.className='feedback good';fb.textContent='정답이에요! 👏';
+  }else{
+    btn.classList.add('wrong');fb.className='feedback soft';fb.textContent='정답은 “'+matchPeople[correct]+'”이에요.';
+    var bs=document.querySelectorAll('#box-match .choice');bs[correct].classList.add('right');
+  }
+  var c=document.getElementById('box-match');
+  var nx=document.createElement('button');nx.className='big-next';nx.textContent='다음 ▶';
+  nx.onclick=function(){matchIdx++;drawMatch();};c.appendChild(nx);
+}
+var oxIdx=0,oxScore=0,oxSet=null,oxKey='',oxBox='';
+function renderOX(key,set,box){oxIdx=0;oxScore=0;oxSet=set;oxKey=key;oxBox=box;drawOX();}
+function drawOX(){
+  var c=document.getElementById(oxBox);
+  if(oxIdx>=oxSet.length){
+    c.innerHTML='<div class="finish"><div class="big">⭐</div><h3>'+oxScore+' / '+oxSet.length+' 맞혔어요!</h3>'
+      +'<p>골든벨 끝! 잘했어요.</p></div>'
+      +'<button class="big-next gold" onclick="finishOX()">도장 받으러 가기 🎖️</button>';
+    state.done[oxKey]=true;save();
+    return;
+  }
+  var item=oxSet[oxIdx];
+  c.innerHTML='<div class="q-progress">'+(oxIdx+1)+' / '+oxSet.length+'</div>'
+    +'<div class="q-card">'+item.q+'</div>'
+    +'<div class="ox-row"><button class="ox o" onclick="answerOX(true)">O</button>'
+    +'<button class="ox x" onclick="answerOX(false)">X</button></div>'
+    +'<div class="feedback" id="ox-fb"></div>';
+}
+function answerOX(val){
+  var item=oxSet[oxIdx];var fb=document.getElementById('ox-fb');
+  document.querySelectorAll('#'+oxBox+' .ox').forEach(function(b){b.disabled=true;});
+  if(val===item.a){oxScore++;fb.className='feedback good';fb.textContent='정답이에요! 🎉';}
+  else{fb.className='feedback soft';fb.textContent=item.no||'다시 한 번! 정답은 '+(item.a?'O':'X')+'예요.';}
+  var c=document.getElementById(oxBox);
+  var nx=document.createElement('button');nx.className='big-next';nx.textContent='다음 ▶';
+  nx.onclick=function(){oxIdx++;drawOX();};c.appendChild(nx);
+}
+function finishOX(){
+  if(oxKey.indexOf('yongsu')===0)go('yongsu');
+  else if(oxKey.indexOf('daejeong')===0)go('daejeong');
+  else if(oxKey.indexOf('more_')===0)openMore(currentMore);
+  else go('hallim');
+  checkAllDone();
+}
+
+/* ---------------- bingo ---------------- */
+var YONGSU_BINGO=[
+  {e:'🚣',l:'라파엘호'},{e:'⛪',l:'성당·공소'},{e:'✝️',l:'십자가'},
+  {e:'🌊',l:'바다'},{e:'🙏',l:'신부님 동상'},{e:'📿',l:'묵주'},
+  {e:'🌸',l:'꽃'},{e:'🪨',l:'돌담'},{e:'🔔',l:'종'}
+];
+var VAN_BINGO=[
+  {e:'🌊',l:'바다'},{e:'🌬️',l:'풍력발전기'},{e:'🐎',l:'말'},
+  {e:'🧱',l:'돌담'},{e:'🌴',l:'야자수'},{e:'☁️',l:'구름'},
+  {e:'🍊',l:'감귤밭'},{e:'🐦',l:'새'},{e:'🚜',l:'트랙터'}
+];
+var bingoFound={};
+function renderBingo(box,set,key,required){
+  bingoFound[key]=bingoFound[key]||{};
+  var c=document.getElementById(box);
+  var html='<div class="bingo-grid">';
+  set.forEach(function(it,i){
+    var f=bingoFound[key][i]?' found':'';
+    html+='<button class="tile'+f+'" onclick="tapTile(\''+box+'\',\''+key+'\','+i+','+required+')">'
+      +'<span class="e">'+it.e+'</span><span class="l">'+it.l+'</span></button>';
+  });
+  html+='</div><div class="count-pill" id="cnt-'+key+'"></div>';
+  if(required)html+='<button class="big-next gold" id="bingo-btn-'+key+'" onclick="finishBingo(\''+key+'\')">도장 받기 🎖️</button>';
+  c.innerHTML=html;updateBingoCount(key,required);
+}
+function tapTile(box,key,i,required){
+  bingoFound[key][i]=!bingoFound[key][i];
+  renderBingo(box,key==='van'?VAN_BINGO:YONGSU_BINGO,key,required);
+}
+function countFound(key){var n=0;for(var k in bingoFound[key])if(bingoFound[key][k])n++;return n;}
+function updateBingoCount(key,required){
+  var n=countFound(key);var p=document.getElementById('cnt-'+key);
+  if(p)p.textContent='찾은 개수 : '+n+' / 9';
+  if(required){var b=document.getElementById('bingo-btn-'+key);if(b)b.disabled=n<6;}
+}
+function finishBingo(key){
+  if(countFound(key)<6)return;
+  state.done.yongsu_bingo=true;save();
+  go('yongsu');checkAllDone();
+}
+
+/* ---------------- gift sort ---------------- */
+var GIFTS=[
+  {e:'🐄',l:'이시돌 목장',yes:true},{e:'🐑',l:'양 키우기',yes:true},
+  {e:'🐷',l:'돼지 키우기',yes:true},{e:'🏥',l:'병원',yes:true},
+  {e:'🏫',l:'유치원',yes:true},{e:'👵',l:'요양원',yes:true},
+  {e:'🎢',l:'놀이공원',yes:false},{e:'✈️',l:'비행기',yes:false},
+  {e:'🍔',l:'햄버거 가게',yes:false}
+];
+var giftIdx=0,giftScore=0;
+function renderGift(){giftIdx=0;giftScore=0;drawGift();}
+function drawGift(){
+  var c=document.getElementById('box-hallim_gift');
+  if(giftIdx>=GIFTS.length){
+    c.innerHTML='<div class="finish"><div class="big">🎁</div><h3>'+giftScore+' / '+GIFTS.length+' 맞혔어요!</h3>'
+      +'<p>신부님이 제주에 주신 선물을 잘 찾았어요.</p></div>'
+      +'<button class="big-next gold" onclick="state.done.hallim_gift=true;save();go(\'hallim\');checkAllDone();">돌아가기 🎖️</button>';
+    return;
+  }
+  var g=GIFTS[giftIdx];
+  c.innerHTML='<div class="q-progress">'+(giftIdx+1)+' / '+GIFTS.length+'</div>'
+    +'<div class="sort-card"><span class="e">'+g.e+'</span><span class="l">'+g.l+'</span></div>'
+    +'<div class="sort-row"><button class="sort-btn yes" onclick="ansGift(true)">신부님이<br>주신 것 ⭕</button>'
+    +'<button class="sort-btn no" onclick="ansGift(false)">아니에요 ❌</button></div>'
+    +'<div class="feedback" id="gift-fb"></div>';
+}
+function ansGift(val){
+  var g=GIFTS[giftIdx];var fb=document.getElementById('gift-fb');
+  document.querySelectorAll('#box-hallim_gift .sort-btn').forEach(function(b){b.disabled=true;});
+  if(val===g.yes){giftScore++;fb.className='feedback good';fb.textContent='맞아요! 👏';}
+  else{fb.className='feedback soft';fb.textContent=g.yes?'이건 신부님이 주신 거예요!':'이건 신부님과 관계없어요.';}
+  var c=document.getElementById('box-hallim_gift');
+  var nx=document.createElement('button');nx.className='big-next';nx.textContent='다음 ▶';
+  nx.onclick=function(){giftIdx++;drawGift();};c.appendChild(nx);
+}
+
+/* ---------------- quote ---------------- */
+function quoteAns(btn,correct){
+  document.querySelectorAll('#hallim_quote .choice').forEach(function(b){b.style.pointerEvents='none';});
+  var fb=document.getElementById('quote-fb');
+  if(correct){
+    btn.classList.add('right');fb.className='feedback good';fb.textContent='정답! “아일랜드 놈이에요!” 🍀';
+    state.done.hallim_quote=true;save();
+    var nx=document.createElement('button');nx.className='big-next gold';nx.textContent='돌아가기 🎖️';
+    nx.onclick=function(){go('hallim');checkAllDone();};
+    document.getElementById('hallim_quote').appendChild(nx);
+  }else{
+    btn.classList.add('wrong');fb.className='feedback soft';fb.textContent='다시! 신부님은 “아일랜드”에서 오셨어요.';
+    setTimeout(function(){
+      btn.classList.remove('wrong');
+      document.querySelectorAll('#hallim_quote .choice').forEach(function(b){b.style.pointerEvents='auto';});
+      fb.textContent='';
+    },1400);
+  }
+}
+
+/* ---------------- daejeong ---------------- */
+function toggleMission(el,i){state.missions[i]=!state.missions[i];el.classList.toggle('on');save();refresh();}
+function markDaejeong(){state.done.daejeong=true;save();confetti();go('home');checkAllDone();}
+
+/* ---------------- boat ---------------- */
+function markBoat(){state.done.boat=true;save();go('yongsu');}
+
+/* ---------------- 제주의 다른 성지 ---------------- */
+var MORE_SITES=[
+  {key:'giryang',emoji:'⚓',title:'김기량 순교기념관',sub:"제주의 첫 신자, '제주의 사도'",
+   story:'<strong>김기량(펠릭스 베드로)</strong>은 제주 함덕에서 태어난 뱃사람이에요. 배로 장사를 다니다 1857년 큰 풍랑을 만나 멀리 중국 앞바다까지 떠내려갔는데, 영국 배가 구해 주어 홍콩까지 가게 되었어요. 그곳에서 하느님을 알게 되어 세례를 받고, 제주로 돌아와 처음으로 이웃에게 믿음을 전한 <strong>‘제주의 첫 신자’</strong>가 되었지요. 뒷날 박해 때 끝까지 믿음을 지키다 순교하셨어요. 함덕 바닷가 가까이에 그를 기리는 기념관과 순례길(김기량길)이 있어요.',
+   info:'제주시 조천읍 일주동로 1216 · 관람 10시~17시(목요일 쉼)',search:'김기량 순교기념관',
+   prayerTitle:'김기량 펠릭스 베드로를 기리는 기도',
+   prayerText:'하느님,<br>넓은 바다에서 당신을 만난<br>김기량 펠릭스 베드로처럼<br>저희도 어디서나 당신을 알아보고<br>이웃에게 기쁜 소식을 전하게 하소서.',
+   ox:[{q:'김기량은 제주에서 처음으로 믿음을 가진 “제주의 첫 신자”예요.',a:true},
+       {q:'김기량은 함덕에서 태어난 뱃사람이었어요.',a:true},
+       {q:'김기량은 큰 풍랑을 만나 먼바다까지 떠내려간 적이 있어요.',a:true},
+       {q:'김기량은 제주가 아닌 외국에서 태어났어요.',a:false,no:'아니에요! 제주 함덕에서 태어났어요.'}]},
+  {key:'gyeonghan',emoji:'👶',title:'황경한 묘소 (추자도)',sub:'정난주 마리아님의 아들',
+   story:'<strong>황경한</strong>은 대정성지에 계신 <strong>정난주 마리아님의 아들</strong>이에요. 아기 때 어머니와 헤어져 추자도에서 자랐지요. 어머니는 아들만은 노비로 살지 않게 하려고 뱃사공에게 부탁해 섬에 살며시 내려놓았고, 마음씨 착한 오씨 집안이 아기를 거두어 길렀어요. 추자도에는 황경한의 묘가 있어, 어머니와 아들의 애틋한 사랑을 기억해요.',
+   info:'제주 추자도 예초리 (배를 타고 가요)',search:'황경한 묘소 추자도',
+   prayerTitle:'황경한을 기억하는 기도',
+   prayerText:'하느님,<br>어머니와 헤어진 어린 황경한을<br>지켜 주셨듯이,<br>외롭고 힘든 이들을<br>따뜻하게 돌봐 주소서.',
+   ox:[{q:'황경한은 정난주 마리아님의 아들이에요.',a:true},
+       {q:'황경한은 추자도에서 자랐어요.',a:true},
+       {q:'황경한은 아기 때 어머니와 헤어졌어요.',a:true},
+       {q:'황경한은 어머니와 평생 함께 살았어요.',a:false,no:'아니에요! 아기 때 헤어져 추자도에서 자랐어요.'}]},
+  {key:'saemi',emoji:'🌳',title:'새미 은총의 동산',sub:'예수님 이야기를 걸으며 묵상하는 곳',
+   story:'한림 <strong>이시돌</strong> 근처에 있는 넓은 기도 동산이에요. 제주를 도운 임피제 신부님의 이시돌과 이어진 곳이지요. <strong>예수님의 일생과 십자가의 길</strong>을 조각으로 만들어 두어, 천천히 걸으며 예수님 이야기를 하나씩 묵상할 수 있어요. 맑은 연못(새미)과 삼위일체 대성당도 있어, 걷다 보면 마음이 저절로 평화로워지는 곳이에요.',
+   info:'제주시 한림읍 금악리 (이시돌 근처)',search:'새미 은총의 동산',
+   prayerTitle:'새미 은총의 동산 기도',
+   prayerText:'하느님,<br>예수님께서 걸으신 길을 따라 걸으며<br>그 사랑을 배웁니다.<br>저희도 이웃을 섬기며<br>기쁘게 살게 하소서.',
+   ox:[{q:'새미 은총의 동산에서는 예수님의 일생을 조각으로 볼 수 있어요.',a:true},
+       {q:'천천히 걸으며 기도하고 묵상하는 동산이에요.',a:true},
+       {q:'제주를 도운 임피제 신부님의 이시돌과 이어진 곳이에요.',a:true},
+       {q:'이곳은 놀이기구를 타는 놀이공원이에요.',a:false,no:'아니에요! 걸으며 기도하는 조용한 동산이에요.'}]},
+  {key:'hwangsapyeong',emoji:'⛪',title:'황사평 성지',sub:'평화를 기도하는 묘역',
+   story:'오래전 제주에서 일어난 큰 갈등으로 목숨을 잃은 많은 분들이 이곳에 함께 잠들어 있어요. 제주 신자들이 그분들을 정성껏 모셔, 지금은 조용히 기도하며 <strong>평화</strong>를 비는 성지가 되었어요.',
+   info:'제주시 기와5길 117-22 · ☎064-721-0146',search:'황사평성지',
+   prayerTitle:'평화를 비는 기도',
+   prayerText:'하느님,<br>믿음을 지키다 목숨을 바친 분들을<br>기억합니다.<br>그분들에게 영원한 안식을,<br>저희에게는 서로 용서하는 평화를 주소서.',
+   ox:[{q:'황사평 성지는 많은 분들이 함께 잠들어 있는 묘역이에요.',a:true},
+       {q:'이곳은 조용히 기도하며 평화를 비는 성지예요.',a:true},
+       {q:'황사평 성지는 시끄럽게 뛰어노는 놀이터예요.',a:false,no:'아니에요! 조용히 기도하는 곳이에요.'}]},
+  {key:'gwandeok',emoji:'🏛️',title:'관덕정',sub:'제주 신앙 선조들을 기억하는 곳',
+   story:'관덕정은 제주 시내에 있는 아주 오래된 정자예요. 나라의 <strong>보물</strong>로 지정될 만큼 소중하지요. 오래전 제주에서 큰 갈등이 있었고, 그때 이 앞 넓은 마당에서 많은 이들이 목숨을 잃었어요. 지금은 그분들을 기억하고 평화를 기도하는 곳이에요.',
+   info:'제주시 삼도2동 · 보물 제322호',search:'관덕정 제주',
+   prayerTitle:'평화를 비는 기도',
+   prayerText:'하느님,<br>오래전 이곳에서 목숨을 잃은<br>모든 분을 기억합니다.<br>아픔을 씻어 주시고,<br>저희가 화해와 평화의 사람이 되게 하소서.',
+   ox:[{q:'관덕정은 제주 시내에 있는 아주 오래된 건물이에요.',a:true},
+       {q:'관덕정은 나라의 보물로 지정될 만큼 소중해요.',a:true},
+       {q:'관덕정은 놀이공원이에요.',a:false,no:'아니에요! 오래된 소중한 정자예요.'}]},
+  {key:'hanon',emoji:'🌋',title:'하논성당 순례지',sub:'서귀포 신앙이 시작된 곳',
+   story:'서귀포 <strong>하논</strong>은 한라산 남쪽(산남)에서 신앙이 처음 자리 잡은 곳이에요. 1900년 이곳에 성당이 세워졌는데, 지금은 그 <strong>터와 큰 은행나무</strong>가 남아 있어요. 하논은 화산이 만든 아주 넓은 <strong>분화구</strong>라 풍경도 특별하지요. 훗날 홍로성당을 거쳐 서귀포성당으로 이어지며, 서귀포 여러 성당의 <strong>뿌리</strong>가 된 곳이랍니다. 이 부근에서 활동하신 <strong>에밀 타케 신부님</strong>은 제주의 꽃과 나무를 사랑해 연구하고 귤나무를 가꾸신 분으로도 잘 알려져 있어요.',
+   info:'서귀포시 하논분화구 (서귀포성당에서 걷는 순례길)',search:'하논성당 터 서귀포',
+   prayerTitle:'하논성당 순례 기도',
+   prayerText:'하느님,<br>이 땅에 처음 신앙의 씨앗을<br>심어 주신 은혜에 감사드립니다.<br>저희 마음에도 그 믿음이<br>뿌리내려 자라게 하소서.',
+   ox:[{q:'하논성당은 한라산 남쪽(서귀포)에서 신앙이 시작된 곳이에요.',a:true},
+       {q:'지금 하논성당 터에는 큰 은행나무가 남아 있어요.',a:true},
+       {q:'하논은 화산이 만든 넓은 분화구예요.',a:true},
+       {q:'하논성당은 지금도 큰 건물이 그대로 남아 있어요.',a:false,no:'아니에요! 지금은 성당 터가 남아 있어요.'}]}
+];
+var currentMore=null;
+function moreFind(k){for(var i=0;i<MORE_SITES.length;i++)if(MORE_SITES[i].key===k)return MORE_SITES[i];}
+function renderGrid(id,keys){
+  var box=document.getElementById(id);if(!box)return;
+  var html='<div class="more-grid">';
+  keys.forEach(function(k){var m=COURSE_META[k];
+    var done=(m.type==='main'?siteComplete(k):state.done['more_'+k]);
+    var open=m.type==='main'?"go('"+k+"')":"openMore('"+k+"')";
+    var stamp=done?'<div class="ministamp done">✓</div>':'<div class="ministamp">미션<br>전</div>';
+    html+='<div class="more-card" onclick="'+open+'"><div class="num">'+m.emoji+'</div>'
+      +'<b>'+m.title+'</b>'+stamp+'</div>';
+  });
+  html+='</div>';box.innerHTML=html;
+}
+function renderMoreList(){
+  var sel=state.myCourse||[];
+  renderGrid('more-list',ALL_KEYS.filter(function(k){return sel.indexOf(k)<0;}));
+}
+function renderAllSites(){renderGrid('allsites-list',ALL_KEYS);}
+function layoutHome(){
+  var p=!!state.planned;
+  var ids={'sec-stamp':p,'sec-other':p,'sec-bonus':p,'sec-all':!p};
+  for(var id in ids){var el=document.getElementById(id);if(el)el.style.display=ids[id]?'block':'none';}
+  if(p){renderSites();renderMoreList();}else{renderAllSites();}
+}
+function openMore(key){
+  currentMore=key;var s=moreFind(key);
+  document.getElementById('more-title').textContent=s.emoji+' '+s.title;
+  var kakao='https://map.kakao.com/link/search/'+encodeURIComponent(s.search);
+  var done=state.done['more_'+key];
+  var body='<div class="intro-card"><span class="em">'+s.emoji+'</span>'+s.story+'</div>'
+    +'<div class="stop-card" style="margin-bottom:14px"><div class="note">📍 '+s.info+'</div>'
+    +'<div class="stop-actions"><a class="act nav" target="_blank" rel="noopener" href="'+kakao+'">길찾기</a></div></div>';
+  if(s.prayerText){
+    body+='<div class="pray-box"><h4>🙏 '+s.prayerTitle+'</h4>'+s.prayerText+'<span class="amen">아멘.</span></div>';
+  }
+  body+='<button class="menu-btn" onclick="startMoreQuiz()"><span class="ic">💡</span>'
+    +'<div class="t"><b>OX 퀴즈 미션</b><small>'+(done?'완료! 도장을 받았어요 🎖️':'다 풀면 도장이 찍혀요')+'</small></div>'
+    +'<span class="chk">'+(done?'✓':'')+'</span></button>';
+  document.getElementById('more-body').innerHTML=body;
+  go('moredetail');
+}
+function startMoreQuiz(){
+  var s=moreFind(currentMore);
+  document.getElementById('more-body').innerHTML='<div id="box-more"></div>';
+  renderOX('more_'+currentMore,s.ox,'box-more');
+}
+
+/* ---------------- 나만의 순례 코스 ---------------- */
+var COURSE_META={
+  yongsu:{emoji:'⛵',title:'용수성지',desc:'김대건 신부님이 배를 타고 닿은 곳',search:'용수성지 표착기념관',type:'main',
+    intro:'김대건 신부님이 배를 타고 닿은 곳이에요.',
+    prayerTitle:'성 김대건 안드레아 사제 기도문',
+    prayerText:'진리의 근원이신 하느님,<br>성 김대건 안드레아 사제가 당신 사랑에 응답하여<br>순교로 당신의 영광을 드러내게 하셨으니,<br>저희도 “용기를 내어라” 하신 말씀을 따라<br>담대히 그리스도를 증거하게 하소서.'},
+  daejeong:{emoji:'🌿',title:'대정성지',desc:'정난주 마리아님의 묘 · 조용히 기도',search:'대정성지 정난주',type:'main',
+    intro:'정난주 마리아님의 묘가 있는 조용한 곳이에요.',
+    prayerTitle:'정난주 마리아를 위한 기도문',
+    prayerText:'하느님, 정난주 마리아처럼<br>어려움 속에서도 믿음을 지키는 용기를 주시고,<br>이웃을 사랑하고 돕는 삶을 살게 하소서.<br>이 순례가 제 신앙을 돌아보는 시간이 되게 하소서.'},
+  hallim:{emoji:'🐑',title:'한림 임피제-임승필 사제 기념관',desc:'제주를 푸르게 바꾼 신부님',search:'한림성당',type:'main',
+    intro:'제주를 푸르게 바꾼 임피제 신부님과, 성경을 우리말로 옮긴 임승필 신부님을 기려요.',
+    prayerTitle:'두 신부님을 기리는 기도',
+    prayerText:'하느님, 이웃을 위해 평생을 바친<br>임피제·임승필 신부님처럼<br>저희도 가진 것을 나누고<br>말씀을 사랑하게 하소서.'},
+  giryang:{emoji:'⚓',title:'김기량 순교기념관',desc:'제주의 첫 신자, 제주의 사도',search:'김기량 순교기념관',type:'more'},
+  gyeonghan:{emoji:'👶',title:'황경한 묘소 (추자도)',desc:'정난주 마리아님의 아들',search:'황경한 묘소 추자도',type:'more'},
+  saemi:{emoji:'🌳',title:'새미 은총의 동산',desc:'예수님 이야기를 걸으며 묵상',search:'새미 은총의 동산',type:'more'},
+  hwangsapyeong:{emoji:'⛪',title:'황사평 성지',desc:'평화를 기도하는 묘역',search:'황사평성지',type:'more'},
+  gwandeok:{emoji:'🏛️',title:'관덕정',desc:'신앙 선조들을 기억하는 곳',search:'관덕정 제주',type:'more'},
+  hanon:{emoji:'🌋',title:'하논성당 순례지',desc:'서귀포 신앙이 시작된 곳',search:'하논성당 터 서귀포',type:'more'}
+};
+var ALL_KEYS=['yongsu','daejeong','hallim','giryang','gyeonghan','saemi','hwangsapyeong','gwandeok','hanon'];
+function courseMeta(k){
+  var m=COURSE_META[k];if(m.type!=='more')return m;
+  var s=moreFind(k);
+  return {emoji:m.emoji,title:m.title,search:m.search,type:'more',intro:s.story.replace(/<[^>]+>/g,''),prayerTitle:s.prayerTitle,prayerText:s.prayerText};
+}
+function renderCourse(){
+  var box=document.getElementById('course-body');if(!box)return;
+  var sel=state.myCourse||[];
+  var html='<p class="bingo-hint">가고 싶은 성지를 담고, 화살표로 순서를 정해요.</p>';
+  html+='<div class="section-label">내 코스 ('+sel.length+'곳)</div>';
+  if(!sel.length)html+='<p class="bingo-hint">아직 담은 성지가 없어요. 아래에서 골라 담아요.</p>';
+  sel.forEach(function(k,i){var m=COURSE_META[k];
+    html+='<div class="site"><div class="num">'+m.emoji+'</div><div class="info"><b>'+(i+1)+'. '+m.title+'</b></div>'
+      +'<div class="reorder"><button onclick="moveCourse('+i+',-1)" '+(i===0?'disabled':'')+'>▲</button>'
+      +'<button onclick="moveCourse('+i+',1)" '+(i===sel.length-1?'disabled':'')+'>▼</button></div>'
+      +'<button class="course-drop" onclick="dropCourse(\''+k+'\')">빼기</button></div>';
+  });
+  html+='<div class="section-label">성지 담기</div>';
+  ALL_KEYS.forEach(function(k){var m=COURSE_META[k];var inc=sel.indexOf(k)>=0;
+    html+='<div class="site" style="cursor:default"><div class="num">'+m.emoji+'</div><div class="info"><b>'+m.title+'</b></div>'
+      +'<button class="course-add" onclick="addCourse(\''+k+'\')" '+(inc?'disabled':'')+'>'+(inc?'담김 ✓':'＋ 담기')+'</button></div>';
+  });
+  if(sel.length){
+    html+='<button class="big-next" style="margin-top:14px" onclick="confirmPlan()">이 일정으로 정하기 ✓</button>';
+    html+='<button class="big-next gold" style="margin-top:10px" onclick="go(\'mycourse\')">내 순례 코스 보기 📖</button>';
+  }
+  box.innerHTML=html;
+}
+function confirmPlan(){state.planned=true;save();go('home');}
+
+/* ---------------- 순례단 · 알림 (FCM) ---------------- */
+var leaderPw='';
+function api(path,data,method){
+  return fetch(path,{method:method||'POST',headers:{'Content-Type':'application/json'},
+    body:data?JSON.stringify(data):undefined}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});});
+}
+function renderTroop(){
+  var box=document.getElementById('troop-body');
+  var here=state.troopName?('<div class="stop-card" style="margin-bottom:14px"><b>🔔 '+state.troopName+'</b><div class="note">이 순례단의 알림을 받도록 되어 있어요.</div></div>'):'';
+  box.innerHTML=here
+    +'<button class="menu-btn" onclick="troopJoin()"><span class="ic">🙋</span><div class="t"><b>순례단 들어가기</b><small>이미 있는 순례단을 골라 알림 받기</small></div></button>'
+    +'<button class="menu-btn" onclick="troopCreate()"><span class="ic">➕</span><div class="t"><b>순례단 만들기</b><small>단장이 새 순례단을 개설해요</small></div></button>'
+    +'<button class="menu-btn" onclick="troopLeader()"><span class="ic">🔑</span><div class="t"><b>단장 로그인</b><small>기간 설정·알림 발송 (비번 필요)</small></div></button>'
+    +'<p class="bingo-hint">알림을 받으려면 Firebase 설정(FIREBASE_CONFIG·VAPID_KEY)과 서비스워커가 필요해요. 아이폰은 홈 화면에 앱을 추가한 상태에서만 알림이 와요.</p>';
+}
+function troopCreate(){
+  var box=document.getElementById('troop-body');
+  box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>➕ 순례단 만들기</h2></div>'
+    +'<div class="trip-form" style="display:flex"><label>순례단 이름 <input id="tCreateName" placeholder="예: 남원 순례단"></label>'
+    +'<button class="big-next" onclick="doCreate()">개설하기</button></div><div class="feedback" id="tMsg"></div>';
+}
+function doCreate(){
+  var name=document.getElementById('tCreateName').value.trim();
+  if(!name)return;
+  document.getElementById('tMsg').textContent='개설 중...';
+  api('/api/create',{name:name}).then(function(r){
+    if(!r.ok){document.getElementById('tMsg').textContent=r.j.error||'실패했어요';return;}
+    state.troopId=r.j.id;state.troopName=r.j.fullName;save();
+    var box=document.getElementById('troop-body');
+    box.innerHTML='<div class="stop-card"><b>✅ '+r.j.fullName+' 개설 완료</b>'
+      +'<div class="note">단원들에게 이 이름(<b>'+r.j.fullName+'</b>)을 알려주면 스스로 들어올 수 있어요.<br><br>'
+      +'단장 비밀번호는 처음에 <b>0000</b>이에요. ‘단장 로그인’ 후 꼭 바꿔주세요.</div></div>'
+      +'<button class="big-next gold" onclick="renderTroop()">확인</button>';
+  }).catch(function(){document.getElementById('tMsg').textContent='연결에 실패했어요';});
+}
+function troopJoin(){
+  var box=document.getElementById('troop-body');
+  box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🙋 순례단 들어가기</h2></div><p class="bingo-hint">목록을 불러오는 중...</p>';
+  api('/api/list',null,'GET').then(function(r){
+    var items=(r.j&&r.j.items)||[];
+    var html='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🙋 순례단 들어가기</h2></div>';
+    if(!items.length)html+='<p class="bingo-hint">아직 개설된 순례단이 없어요.</p>';
+    items.forEach(function(it){
+      html+='<button class="menu-btn" onclick="doJoin(\''+it.id+'\',\''+it.fullName.replace(/'/g,"")+'\')">'
+        +'<span class="ic">⛪</span><div class="t"><b>'+it.fullName+'</b><small>이 순례단 알림 받기</small></div></button>';
+    });
+    html+='<div class="feedback" id="tMsg"></div>';
+    document.getElementById('troop-body').innerHTML=html;
+  }).catch(function(){document.getElementById('troop-body').innerHTML='<p class="bingo-hint">목록을 불러오지 못했어요.</p>';});
+}
+function doJoin(id,fullName){
+  enableAlerts(id).then(function(ok){
+    if(ok){state.troopId=id;state.troopName=fullName;save();
+      var m=document.getElementById('tMsg');if(m){m.className='feedback good';m.textContent='알림을 받도록 설정됐어요! 🔔';}}
+  });
+}
+function enableAlerts(id){
+  if(!('serviceWorker' in navigator)||typeof firebase==='undefined'){alert('이 기기/브라우저는 알림을 지원하지 않아요.');return Promise.resolve(false);}
+  if(!initCloud()){alert('먼저 FIREBASE_CONFIG 설정이 필요해요.');return Promise.resolve(false);}
+  return navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function(reg){
+    return Notification.requestPermission().then(function(p){
+      if(p!=='granted'){alert('알림이 허용되지 않았어요.');return false;}
+      return firebase.messaging().getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg}).then(function(token){
+        return api('/api/join',{id:id,token:token}).then(function(r){
+          if(!r.ok){alert(r.j.error||'구독 실패');return false;}
+          return true;
+        });
+      });
+    });
+  }).catch(function(e){alert('알림 설정 실패: '+e.message);return false;});
+}
+function troopLeader(){
+  var box=document.getElementById('troop-body');
+  box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🔑 단장 로그인</h2></div>'
+    +'<div class="trip-form" style="display:flex">'
+    +'<label>순례단 코드 <input id="tLid" placeholder="예: AB12" value="'+(state.troopId||'')+'"></label>'
+    +'<label>비밀번호 <input id="tLpw" type="password" placeholder="처음엔 0000"></label>'
+    +'<button class="big-next" onclick="doLeaderLogin()">로그인</button></div><div class="feedback" id="tMsg"></div>';
+}
+function doLeaderLogin(){
+  var id=document.getElementById('tLid').value.trim().toUpperCase();
+  var pw=document.getElementById('tLpw').value;
+  document.getElementById('tMsg').textContent='확인 중...';
+  api('/api/leader-login',{id:id,pw:pw}).then(function(r){
+    if(!r.ok){document.getElementById('tMsg').textContent=r.j.error||'실패';return;}
+    leaderPw=pw;state.troopId=id;state.troopName=r.j.fullName;save();
+    leaderPanel(r.j);
+  }).catch(function(){document.getElementById('tMsg').textContent='연결 실패';});
+}
+function leaderPanel(info){
+  var warn=info.pwChanged?'':'<div class="setup-note">⚠️ 아직 기본 비밀번호(0000)예요. 아래에서 꼭 바꿔주세요.</div>';
+  var box=document.getElementById('troop-body');
+  box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🔑 '+state.troopName+'</h2></div>'+warn
+    +'<div class="section-label">비밀번호 바꾸기</div>'
+    +'<div class="trip-form" style="display:flex"><label>새 비밀번호 <input id="tNewPw" type="password" placeholder="4자 이상"></label>'
+    +'<button class="big-next" onclick="doChangePw()">변경</button></div>'
+    +'<div class="section-label">알림 허용 기간</div>'
+    +'<div class="trip-form" style="display:flex"><label>시작 <input id="tStart" type="date" value="'+(info.notifyStart?String(info.notifyStart).slice(0,10):'')+'"></label>'
+    +'<label>종료 <input id="tEnd" type="date" value="'+(info.notifyEnd?String(info.notifyEnd).slice(0,10):'')+'"></label>'
+    +'<button class="big-next" onclick="doSaveConfig()">기간 저장</button></div>'
+    +'<div class="section-label">알림 보내기</div>'
+    +'<div class="trip-form" style="display:flex"><label>제목 <input id="tTitle" placeholder="예: 출발 안내"></label>'
+    +'<label>내용 <input id="tBody" placeholder="예: 9시 10분 성당 앞 집합"></label>'
+    +'<button class="big-next gold" onclick="doNotify('+(info.pwChanged?'true':'false')+')">알림 발송</button></div>'
+    +'<div class="section-label">순례단 관리</div>'
+    +'<button class="reset" style="color:#cf4d4d" onclick="doDeleteTroop()">이 순례단 삭제하기</button>'
+    +'<div class="feedback" id="tMsg"></div>';
+}
+function doDeleteTroop(){
+  if(!confirm('정말 이 순례단을 삭제할까요?\n삭제하면 단원 알림 구독과 설정이 모두 사라져요.'))return;
+  api('/api/delete',{id:state.troopId,pw:leaderPw}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'삭제 실패';return;}
+    if(state.troopId===state.troopId){state.troopId='';state.troopName='';save();}
+    leaderPw='';
+    alert('순례단을 삭제했어요.');
+    renderTroop();
+  }).catch(function(){var m=document.getElementById('tMsg');m.className='feedback soft';m.textContent='연결 실패';});
+}
+function doChangePw(){
+  var np=document.getElementById('tNewPw').value;
+  api('/api/change-pw',{id:state.troopId,pw:leaderPw,newPw:np}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'실패';return;}
+    leaderPw=np;m.className='feedback good';m.textContent='비밀번호를 바꿨어요 ✓';
+  });
+}
+function doSaveConfig(){
+  var s=document.getElementById('tStart').value,e=document.getElementById('tEnd').value;
+  var start=s?s+'T00:00:00+09:00':null,end=e?e+'T23:59:59+09:00':null;
+  api('/api/config',{id:state.troopId,pw:leaderPw,start:start,end:end}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'실패';return;}
+    m.className='feedback good';m.textContent='기간을 저장했어요 ✓';
+  });
+}
+function doNotify(pwChanged){
+  var title=document.getElementById('tTitle').value.trim(),bd=document.getElementById('tBody').value.trim();
+  if(!title||!bd){var m0=document.getElementById('tMsg');m0.className='feedback soft';m0.textContent='제목과 내용을 입력해 주세요';return;}
+  if(!pwChanged && !confirm('아직 기본 비밀번호(0000)를 쓰고 있어요.\n다른 사람도 발송할 수 있으니, 먼저 비밀번호를 바꾸는 것을 권해요.\n그래도 지금 발송할까요?'))return;
+  api('/api/notify',{id:state.troopId,pw:leaderPw,title:title,body:bd}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'발송 실패';return;}
+    m.className='feedback good';m.textContent='알림을 보냈어요! 🔔';
+  });
+}
+function addCourse(k){var a=state.myCourse||(state.myCourse=[]);if(a.indexOf(k)<0)a.push(k);save();renderCourse();}
+function dropCourse(k){var a=state.myCourse||[];var i=a.indexOf(k);if(i>=0)a.splice(i,1);save();renderCourse();}
+function moveCourse(i,dir){var a=state.myCourse,j=i+dir;if(j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;save();renderCourse();}
+function renderMyCourse(){
+  var box=document.getElementById('mycourse-body');if(!box)return;
+  var sel=state.myCourse||[];
+  if(!sel.length){box.innerHTML='<p class="bingo-hint">담은 성지가 없어요. 먼저 코스를 짜 보세요.</p>';return;}
+  var html='<p class="route-day">내가 정한 순서대로 도는 순례 코스예요.</p>';
+  sel.forEach(function(k,i){var m=courseMeta(k);
+    var kakao='https://map.kakao.com/link/search/'+encodeURIComponent(m.search);
+    var line=(i<sel.length-1)?'<div class="line"></div>':'';
+    html+='<div class="stop"><div class="rail"><div class="dot">'+(i+1)+'</div>'+line+'</div>'
+      +'<div class="body"><div class="stop-card"><b>'+m.emoji+' '+m.title+'</b>'
+      +'<div class="note">'+m.intro+'</div>';
+    if(m.prayerText)html+='<div class="pray-box" style="margin:10px 0 0"><h4>🙏 '+m.prayerTitle+'</h4>'+m.prayerText+'<span class="amen">아멘.</span></div>';
+    html+='<div class="stop-actions"><a class="act nav" target="_blank" rel="noopener" href="'+kakao+'">길찾기</a>'
+      +'<button class="act" style="border:none;background:#eef2f7" onclick="'+(m.type==='more'?'openMore(\''+k+'\')':'go(\''+k+'\')')+'">자세히 보기</button>'
+      +'</div></div></div></div>';
+  });
+  box.innerHTML=html;
+}
+
+/* ---------------- 선생님 기록 보기 ---------------- */
+function openTeacher(){
+  var pin=prompt('admin 비밀번호를 입력하세요');
+  if(pin===null)return;
+  if(pin!==TEACHER_PIN){alert('비밀번호가 맞지 않아요.');return;}
+  go('teacher');loadTeacher();
+}
+function recDone(r,site){
+  var d=r.done||{};
+  if(site==='yongsu')return d.yongsu_ox&&d.yongsu_bingo;
+  if(site==='daejeong')return d.daejeong;
+  if(site==='hallim')return d.hallim_gift&&d.hallim_quote&&d.hallim_ox;
+  return false;
+}
+function bonusCount(r){
+  var d=r.done||{};var n=0;
+  ['boat','daejeong_ox','hallim_journey','memory','match'].forEach(function(k){if(d[k])n++;});
+  return n;
+}
+function loadTeacher(){
+  var box=document.getElementById('box-teacher');
+  if(!initCloud()){
+    box.innerHTML='<div class="setup-note"><b>아직 기록 모아보기가 켜지지 않았어요.</b><br>'
+      +'여러 사람의 기록을 한곳에서 보려면 무료 <b>Firebase</b> 설정이 필요해요. '
+      +'파일 속 <code>FIREBASE_CONFIG</code>에 프로젝트 설정을 붙여넣으면 켜집니다. '
+      +'(설정 전에는 각 기기 안에만 기록이 저장돼요.)</div>';
+    return;
+  }
+  box.innerHTML='<p class="bingo-hint">기록을 불러오는 중...</p>';
+  cloudDb.collection('pilgrims').get().then(function(snap){
+    var rows=[];snap.forEach(function(d){rows.push(d.data());});
+    rows.sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0);});
+    renderTeacher(rows);
+  }).catch(function(e){
+    box.innerHTML='<p class="bingo-hint">불러오기에 실패했어요. 인터넷 연결을 확인해 주세요.</p>';
+  });
+}
+function renderTeacher(rows){
+  var box=document.getElementById('box-teacher');
+  if(!rows.length){box.innerHTML='<p class="bingo-hint">아직 저장된 기록이 없어요. 아이들이 이름을 적고 활동을 시작하면 여기에 나타나요.</p>';return;}
+  var done3=rows.filter(function(r){return recDone(r,'yongsu')&&recDone(r,'daejeong')&&recDone(r,'hallim');}).length;
+  var html='<div class="t-summary">참여 '+rows.length+'명 · 여권 완성 '+done3+'명</div>';
+  html+='<div class="t-wrap"><table class="t-table"><thead><tr>'
+    +'<th>이름</th><th>⛵</th><th>🌿</th><th>🐑</th><th>⭐</th><th>업데이트</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    function mk(s){return recDone(r,s)?'<span class="ok">✓</span>':'<span class="no">·</span>';}
+    var t=r.updatedAt?new Date(r.updatedAt):null;
+    var ts=t?(t.getMonth()+1)+'/'+t.getDate()+' '+('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2):'-';
+    html+='<tr><td class="nm">'+escapeHtml(r.name||'-')+'</td><td>'+mk('yongsu')+'</td><td>'+mk('daejeong')
+      +'</td><td>'+mk('hallim')+'</td><td>'+bonusCount(r)+'/5</td><td class="tm">'+ts+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  html+='<p class="bingo-hint">⛵ 용수 · 🌿 대정 · 🐑 한림 도장 / ⭐ 보너스 활동 수. 인터넷이 연결돼 있을 때 최신으로 보여요.</p>';
+  box.innerHTML=html;
+}
+function escapeHtml(s){return (s+'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
+
+/* ---------------- misc ---------------- */
+function confetti(){
+  var em=['🎉','⭐','🎖️','⛵','🌟','🙌'];
+  for(var i=0;i<22;i++){
+    (function(){var s=document.createElement('div');s.className='confetti';
+      s.textContent=em[Math.floor(Math.random()*em.length)];
+      s.style.left=(Math.random()*100)+'vw';s.style.animationDelay=(Math.random()*0.6)+'s';
+      document.body.appendChild(s);setTimeout(function(){s.remove();},2600);})();
+  }
+}
+function resetAll(){
+  if(confirm('정말 처음부터 다시 시작할까요? 모든 도장이 사라져요.')){
+    state={name:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'2026-08-08',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
+    bingoFound={};save();
+    document.getElementById('nameInput').value='';
+    document.querySelectorAll('.mission').forEach(function(m){m.classList.remove('on');});
+    go('home');
+  }
+}
+
+/* ---------------- init ---------------- */
+var SAINT_QUOTES=[
+  {t:'행복합니다, 마음속으로 순례의 길을 생각할 때 당신께 힘을 얻는 사람들!',by:'시편 84,6'},
+  {t:'환난은 인내를 자아내고 인내는 수양을, 수양은 희망을 자아냅니다. 그리고 희망은 우리를 부끄럽게 하지 않습니다.',by:'로마 5,3-5'},
+  {t:'저는 이 땅에서 이방인일 뿐, 제게서 당신 계명을 감추지 마소서.',by:'시편 119,19'},
+  {t:'우리는 아직 고정된 거처가 없는 길 위의 나그네입니다.',by:'성 아우구스티노'},
+  {t:'나의 영혼은 오직 하느님만을 향해 걷는 순례자입니다.',by:'성 이냐시오 데 로욜라'},
+  {t:'하늘로 가는 그 모든 길이, 이미 하늘입니다.',by:'시에나의 성녀 가타리나'},
+  {t:'인생은 낯선 여관에서 보내는 하룻밤과 같습니다.',by:'아빌라의 성녀 데레사'},
+  {t:'이 세상에서 우리는 나그네이며 순례자입니다.',by:'토마스 아 켐피스'},
+  {t:'믿는 이는 이 세상을 지나가는 순례자입니다.',by:'성 요한 바오로 2세'},
+  {t:'용기를 내어라.',by:'성 김대건 안드레아'}
+];
+function showSplash(){
+  var q=SAINT_QUOTES[Math.floor(Math.random()*SAINT_QUOTES.length)];
+  var qt=document.getElementById('splashQuote'),by=document.getElementById('splashBy');
+  if(qt)qt.textContent='“'+q.t+'”';
+  if(by)by.textContent='— '+q.by;
+}
+function enterApp(){var s=document.getElementById('splash');if(s)s.style.display='none';}
+showSplash();
+
+var ni=document.getElementById('nameInput');
+ni.value=state.name||'';
+ni.addEventListener('input',function(){state.name=ni.value;save();});
+state.missions.forEach(function(v,i){if(v){var ms=document.querySelectorAll('#daejeong .mission')[i];if(ms)ms.classList.add('on');}});
+renderSites();
+renderMoreList();
+layoutHome();
+renderRoute();
+refresh();
+</script>
+</body>
+</html>
