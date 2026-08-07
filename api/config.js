@@ -8,7 +8,10 @@ export default async function handler(req, res) {
     const d = await db.doc('pilgrimages/' + id).get();
     if (!d.exists) return res.status(404).json({ error: '순례단을 찾을 수 없어요' });
     const x = d.data();
-    return res.json({ notifyStart: x.notifyStart, notifyEnd: x.notifyEnd });
+    return res.json({
+      notifyStart: x.notifyStart, notifyEnd: x.notifyEnd,
+      course: x.course || null, tripDate: x.tripDate || null, departTime: x.departTime || null,
+    });
   }
 
   if (req.method !== 'POST') return res.status(405).end();

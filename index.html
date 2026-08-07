@@ -760,7 +760,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}c
 /* 사용하려면 아래 FIREBASE_CONFIG에 본인 프로젝트 설정을 붙여넣고,
    TEACHER_PIN을 원하는 숫자로 바꾸세요. 비워두면 이 기기 안에서만 저장됩니다. */
 var FIREBASE_CONFIG={
-  apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
+   apiKey: "AIzaSyDiUPDAipBHyfwSpbflBERYFyVLAslorJ4",
   authDomain: "jeju-pilgrimage-653d9.firebaseapp.com",
   projectId: "jeju-pilgrimage-653d9",
   storageBucket: "jeju-pilgrimage-653d9.firebasestorage.app",
@@ -1408,12 +1408,31 @@ function api(path,data,method){
 }
 function renderTroop(){
   var box=document.getElementById('troop-body');
-  var here=state.troopName?('<div class="stop-card" style="margin-bottom:14px"><b>🔔 '+state.troopName+'</b><div class="note">이 순례단의 알림을 받도록 되어 있어요.</div></div>'):'';
+  var here=state.troopName
+    ?('<div class="stop-card" style="margin-bottom:12px"><b>🔔 '+state.troopName+'</b><div class="note">이 순례단에 속해 있어요.</div></div>'
+      +'<button class="menu-btn" onclick="pullTroopCourse()"><span class="ic">📥</span><div class="t"><b>단장이 정한 순례 일정 받기</b><small>최신 일정을 내 화면에 불러와요</small></div></button>')
+    :'';
   box.innerHTML=here
     +'<button class="menu-btn" onclick="troopJoin()"><span class="ic">🙋</span><div class="t"><b>순례단 들어가기</b><small>이미 있는 순례단을 골라 알림 받기</small></div></button>'
     +'<button class="menu-btn" onclick="troopCreate()"><span class="ic">➕</span><div class="t"><b>순례단 만들기</b><small>단장이 새 순례단을 개설해요</small></div></button>'
-    +'<button class="menu-btn" onclick="troopLeader()"><span class="ic">🔑</span><div class="t"><b>단장 로그인</b><small>기간 설정·알림 발송 (비번 필요)</small></div></button>'
+    +'<button class="menu-btn" onclick="troopLeader()"><span class="ic">🔑</span><div class="t"><b>단장 로그인</b><small>기간 설정·알림 발송·일정 공유 (비번 필요)</small></div></button>'
     +'<p class="bingo-hint">알림을 받으려면 Firebase 설정(FIREBASE_CONFIG·VAPID_KEY)과 서비스워커가 필요해요. 아이폰은 홈 화면에 앱을 추가한 상태에서만 알림이 와요.</p>';
+}
+function adoptCourse(data){
+  if(!data||!data.course||!data.course.length)return false;
+  state.myCourse=data.course.slice();
+  state.planned=true;
+  if(data.tripDate)state.tripDate=data.tripDate;
+  if(data.departTime)state.departTime=data.departTime;
+  save();
+  return true;
+}
+function pullTroopCourse(){
+  if(!state.troopId){alert('먼저 순례단에 들어가 주세요.');return;}
+  fetch('/api/config?id='+encodeURIComponent(state.troopId)).then(function(r){return r.json();}).then(function(j){
+    if(adoptCourse(j)){alert('단장이 정한 순례 일정을 받았어요! 홈에서 확인하세요.');go('home');}
+    else{alert('아직 단장이 공유한 일정이 없어요.');}
+  }).catch(function(){alert('일정을 불러오지 못했어요.');});
 }
 function troopCreate(){
   var box=document.getElementById('troop-body');
@@ -1451,25 +1470,35 @@ function troopJoin(){
   }).catch(function(){document.getElementById('troop-body').innerHTML='<p class="bingo-hint">목록을 불러오지 못했어요.</p>';});
 }
 function doJoin(id,fullName){
-  enableAlerts(id).then(function(ok){
-    if(ok){state.troopId=id;state.troopName=fullName;save();
-      var m=document.getElementById('tMsg');if(m){m.className='feedback good';m.textContent='알림을 받도록 설정됐어요! 🔔';}}
+  enableAlerts(id).then(function(res){
+    state.troopId=id;state.troopName=fullName;save();
+    var pushed=!!res;
+    if(res&&res.course&&res.course.length){
+      adoptCourse(res);
+      alert((pushed?'알림 설정 완료! ':'')+'단장이 정한 순례 일정을 받았어요. 홈에서 확인하세요.');
+      go('home');return;
+    }
+    // 알림(푸시)이 안 되면 일정만이라도 받아오기
+    fetch('/api/config?id='+encodeURIComponent(id)).then(function(r){return r.json();}).then(function(j){
+      if(adoptCourse(j)){alert('단장이 정한 순례 일정을 받았어요. 홈에서 확인하세요.');go('home');return;}
+      renderTroop();
+    }).catch(function(){renderTroop();});
   });
 }
 function enableAlerts(id){
-  if(!('serviceWorker' in navigator)||typeof firebase==='undefined'){alert('이 기기/브라우저는 알림을 지원하지 않아요.');return Promise.resolve(false);}
-  if(!initCloud()){alert('먼저 FIREBASE_CONFIG 설정이 필요해요.');return Promise.resolve(false);}
+  if(!('serviceWorker' in navigator)||typeof firebase==='undefined'){return Promise.resolve(null);}
+  if(!initCloud()){return Promise.resolve(null);}
   return navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function(reg){
     return Notification.requestPermission().then(function(p){
-      if(p!=='granted'){alert('알림이 허용되지 않았어요.');return false;}
+      if(p!=='granted'){return null;}
       return firebase.messaging().getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg}).then(function(token){
         return api('/api/join',{id:id,token:token}).then(function(r){
-          if(!r.ok){alert(r.j.error||'구독 실패');return false;}
-          return true;
+          if(!r.ok){return null;}
+          return r.j;
         });
       });
     });
-  }).catch(function(e){alert('알림 설정 실패: '+e.message);return false;});
+  }).catch(function(){return null;});
 }
 function troopLeader(){
   var box=document.getElementById('troop-body');
@@ -1504,9 +1533,20 @@ function leaderPanel(info){
     +'<div class="trip-form" style="display:flex"><label>제목 <input id="tTitle" placeholder="예: 출발 안내"></label>'
     +'<label>내용 <input id="tBody" placeholder="예: 9시 10분 성당 앞 집합"></label>'
     +'<button class="big-next gold" onclick="doNotify('+(info.pwChanged?'true':'false')+')">알림 발송</button></div>'
+    +'<div class="section-label">순례 일정 공유</div>'
+    +'<p class="bingo-hint">지금 내 순례 일정(담은 성지·순서·날짜)을 단원들에게 공유해요. 단원이 들어오거나 ‘일정 받기’를 누르면 이 일정을 보게 돼요.</p>'
+    +'<button class="big-next" onclick="doShareCourse()">📤 내 순례 일정 공유하기</button>'
     +'<div class="section-label">순례단 관리</div>'
     +'<button class="reset" style="color:#cf4d4d" onclick="doDeleteTroop()">이 순례단 삭제하기</button>'
     +'<div class="feedback" id="tMsg"></div>';
+}
+function doShareCourse(){
+  if(!state.myCourse||!state.myCourse.length){alert('먼저 ‘나만의 순례 일정 짜기’에서 일정을 정해 주세요.');return;}
+  api('/api/set-course',{id:state.troopId,pw:leaderPw,course:state.myCourse,tripDate:state.tripDate,departTime:state.departTime}).then(function(r){
+    var m=document.getElementById('tMsg');
+    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'공유 실패';return;}
+    m.className='feedback good';m.textContent='순례 일정을 공유했어요! 단원이 받아 볼 수 있어요 ✓';
+  }).catch(function(){var m=document.getElementById('tMsg');m.className='feedback soft';m.textContent='연결 실패';});
 }
 function doDeleteTroop(){
   if(!confirm('정말 이 순례단을 삭제할까요?\n삭제하면 단원 알림 구독과 설정이 모두 사라져요.'))return;

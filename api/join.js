@@ -9,10 +9,17 @@ export default async function handler(req, res) {
   const d = await db.doc('pilgrimages/' + id).get();
   if (!d.exists) return res.status(404).json({ error: '순례단을 찾을 수 없어요' });
 
-  const topic = d.data().topic;
+  const x = d.data();
   try {
-    await fcm.subscribeToTopic(token, topic);
-    res.json({ ok: true, topic, fullName: d.data().fullName });
+    await fcm.subscribeToTopic(token, x.topic);
+    res.json({
+      ok: true,
+      topic: x.topic,
+      fullName: x.fullName,
+      course: x.course || null,
+      tripDate: x.tripDate || null,
+      departTime: x.departTime || null,
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
