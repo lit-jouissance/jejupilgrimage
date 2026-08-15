@@ -474,7 +474,7 @@
       <div id="site-list"></div>
       <button class="route-cta" onclick="go('route')">
         <span class="ic">🗺️</span>
-        <div><b>오늘의 순례길</b><small id="routeSub">남원 출발 · 순례 순서와 시간</small></div>
+        <div><b>오늘의 순례길</b><small id="routeSub">출발지 · 순례 순서와 시간</small></div>
         <span class="go">▶</span>
       </button>
     </div>
@@ -550,7 +550,15 @@
       <div id="tripForm" class="trip-form">
         <label>날짜 <input type="date" id="tripDate"></label>
         <label>출발 시각 <input type="time" id="tripTime"></label>
+        <div class="section-label" style="margin:8px 0 2px">출발·도착지 (우리 성당/지역)</div>
+        <label>이름 <input id="startNameInput" placeholder="예: 서귀포 성당"></label>
+        <label>짧은 이름 <input id="startLabelInput" placeholder="예: 서귀포" maxlength="10"></label>
+        <label>지도 검색어(선택) <input id="startSearchInput" placeholder="비우면 이름으로 검색해요"></label>
+        <label>위도(선택) <input id="startLatInput" inputmode="decimal" placeholder="예: 33.25"></label>
+        <label>경도(선택) <input id="startLngInput" inputmode="decimal" placeholder="예: 126.55"></label>
+        <p class="bingo-hint" style="margin:2px 0 6px">위도·경도를 넣으면 이동 시간이 더 정확해요. 몰라도 괜찮아요(비워도 됩니다).</p>
         <button class="big-next" onclick="saveTrip()">저장</button>
+        <button class="jig-pick" type="button" style="margin-top:8px" onclick="resetStart()">↺ 출발지 기본값으로</button>
       </div>
     </div>
     <p class="route-day" id="routeDay">—</p>
@@ -796,7 +804,7 @@
 <script>
 /* ---------------- state ---------------- */
 var KEY='pilgrim_v1';
-var state={name:'',baptismal:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false,jigsaw:false,spot:false,color:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
+var state={name:'',baptismal:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false,jigsaw:false,spot:false,color:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'',departTime:'09:10',startName:'',startLabel:'',startSearch:'',startLat:null,startLng:null,myCourse:[],planned:false,troopId:'',troopName:''};
 try{var s=localStorage.getItem(KEY);if(s)state=Object.assign(state,JSON.parse(s));}catch(e){}
 (function(){var def=['yongsu','daejeong','hallim'];
   if(!Array.isArray(state.order)||state.order.length!==3||def.some(function(k){return state.order.indexOf(k)<0;}))state.order=def.slice();
@@ -883,17 +891,53 @@ function siteComplete(site){
   if(site==='hallim')return state.done.hallim_gift&&state.done.hallim_quote&&state.done.hallim_ox;
 }
 /* ---------------- 순례 일시 & 길 ---------------- */
-var ROUTE=[
-  {type:'stop',dot:'출',label:'출발',name:'남원 자비의 예수 성당',note:'물·모자·여분 간식을 챙겨 출발해요. 더운 날은 더위 대비가 가장 중요합니다.',tel:'0647641712',telLabel:'064-764-1712',map:'남원자비의예수성당',lat:33.283265,lng:126.7157415,stay:0},
-  {type:'drive',label:'약 55분 (남쪽 해안로)',min:55},
-  {type:'stop',dot:'1',name:'대정성지 (정난주 마리아 묘)',note:'진입로가 좁아 봉고차는 천천히! 주차장은 넓어요. 묘소라 뛰지 않고 조용히 묵상하는 곳이에요.',map:'대정성지정난주마리아묘',lat:33.2541237,lng:126.2611793,stay:35},
-  {type:'drive',label:'약 30분 (서쪽 해안로)',min:30},
-  {type:'stop',dot:'2',name:'용수성지 · 성 김대건 신부 표착기념관',note:'복원된 라파엘호와 전망대가 있어 게임하기 좋아요. 월요일 빼고 오전 11시 순례 미사가 있고, 기념관은 9시~18시예요.',tel:'0647721252',telLabel:'064-772-1252',map:'용수성지표착기념관',lat:33.3228619,lng:126.1677363,stay:60},
-  {type:'lunch',label:'점심 + 이동 (약 1시간 15분) · 고산 또는 한림 시내',min:75},
-  {type:'stop',dot:'3',name:'한림 임피제·임승필 기념관 (한림성당)',note:"두 신부님을 기리는 곳이에요. 시간이 남으면 '임피제 기적의 길' 짧은 코스(무장애)도 걸을 수 있어요.",tel:'0647964044',telLabel:'064-796-4044',map:'한림성당',lat:33.4175625,lng:126.2657801,stay:60},
-  {type:'drive',label:'약 1시간 15분 (남원으로 복귀)',min:75},
-  {type:'stop',dot:'✓',name:'남원 도착 · 순례 마침',note:'길 위에서는 카카오내비·티맵으로 실시간 시간을 확인하세요. 모두 안전하게 다녀오길!',end:true,stay:0}
+/* 성지별 위치·머무는 시간(이동시간은 좌표로 대략 추정). 길찾기는 이름 검색 링크 사용 */
+var SITE_GEO={
+  start:{name:'남원 자비의 예수 성당',label:'남원',lat:33.283265,lng:126.7157415,search:'남원자비의예수성당',tel:'0647641712',telLabel:'064-764-1712',note:'물·모자·여분 간식을 챙겨 출발해요. 더운 날은 더위 대비가 가장 중요합니다.'},
+  yongsu:{lat:33.3228619,lng:126.1677363,tel:'0647721252',telLabel:'064-772-1252',stay:60,note:'복원된 라파엘호와 전망대가 있어 게임하기 좋아요. 월요일 빼고 오전 11시 순례 미사가 있고, 기념관은 9시~18시예요.'},
+  daejeong:{lat:33.2541237,lng:126.2611793,stay:35,note:'진입로가 좁아 봉고차는 천천히! 주차장은 넓어요. 묘소라 뛰지 않고 조용히 묵상하는 곳이에요.'},
+  hallim:{lat:33.4175625,lng:126.2657801,tel:'0647964044',telLabel:'064-796-4044',stay:60,note:"두 신부님을 기리는 곳이에요. 시간이 남으면 '임피제 기적의 길' 짧은 코스(무장애)도 걸을 수 있어요."},
+  giryang:{lat:33.5386,lng:126.6347,stay:40},
+  gyeonghan:{lat:33.9540,lng:126.3186,stay:40,note:'추자도에 있어 배를 타고 가야 해요. 당일 일정에는 시간이 많이 걸리니 미리 배편을 확인하세요.'},
+  saemi:{lat:33.3616,lng:126.3441,stay:50},
+  hwangsapyeong:{lat:33.5089,lng:126.5583,stay:30},
+  gwandeok:{lat:33.5138,lng:126.5219,stay:30},
+  hanon:{lat:33.2497,lng:126.5487,stay:30}
+};
+function haversineKm(a,b,c,d){var R=6371,toR=function(x){return x*Math.PI/180;};var dLa=toR(c-a),dLo=toR(d-b);var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(toR(a))*Math.cos(toR(c))*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(s)));}
+function geoKey(s){return (s==='start'||s==='end')?'start':s;}
+/* 출발·도착지: 사용자가 정한 값이 있으면 그 값, 없으면 SITE_GEO.start(기본값) */
+function startInfo(){
+  var d=SITE_GEO.start,has=!!(state.startName&&state.startName.trim());
+  return {
+    name: has?state.startName.trim():d.name,
+    label:(state.startLabel&&state.startLabel.trim())?state.startLabel.trim():(has?state.startName.trim():d.label),
+    search:(state.startSearch&&state.startSearch.trim())?state.startSearch.trim():(has?state.startName.trim().replace(/\s+/g,''):d.search),
+    lat:(state.startLat!=null)?state.startLat:(has?null:d.lat),
+    lng:(state.startLng!=null)?state.startLng:(has?null:d.lng),
+    tel:has?'':d.tel, telLabel:has?'':d.telLabel, custom:has
+  };
+}
+function coordsFor(k){
+  if(k==='start'||k==='end'){var s=startInfo();return (s.lat!=null&&s.lng!=null)?{lat:s.lat,lng:s.lng}:null;}
+  var g=SITE_GEO[k];return g?{lat:g.lat,lng:g.lng}:null;
+}
+function driveMin(k1,k2){var a=coordsFor(k1),b=coordsFor(k2);if(!a||!b)return 30;var km=haversineKm(a.lat,a.lng,b.lat,b.lng);return Math.max(15,Math.round(km*1.4/45*60));}
+
+/* 순례 시기별 안내 문구 — 자유롭게 고치세요. 날짜(월)에 맞춰 자동으로 골라 보여줍니다 */
+var SEASON_TIPS=[
+  {months:[6,7,8], text:'무더운 날이에요. 물·모자·햇빛 가림을 꼭 챙기고, 그늘에서 자주 쉬며 더위 대비가 가장 중요해요.'},
+  {months:[12,1,2], text:'추운 날이에요. 따뜻하게 껴입고, 바닷바람과 빙판길을 조심해요. 손난로가 있으면 좋아요.'},
+  {months:[3,4,5], text:'일교차가 큰 날이에요. 겉옷을 챙기고, 꽃가루 알레르기가 있으면 마스크를 준비해요.'},
+  {months:[9,10,11], text:'선선한 날이에요. 낮엔 따뜻해도 오후·저녁엔 쌀쌀할 수 있으니 겉옷을 챙겨요.'}
 ];
+var SEASON_TIP_DEFAULT='물·모자·여분 간식을 챙기고, 걷기 편한 신발을 신어요.';
+function seasonTip(){
+  if(!state.tripDate)return SEASON_TIP_DEFAULT;
+  var mo=parseInt(state.tripDate.split('-')[1],10);
+  for(var i=0;i<SEASON_TIPS.length;i++){if(SEASON_TIPS[i].months.indexOf(mo)>=0)return SEASON_TIPS[i].text;}
+  return SEASON_TIP_DEFAULT;
+}
 function parseDepart(){var t=(state.departTime||'09:10').split(':');return new Date(2000,0,1,parseInt(t[0],10)||0,parseInt(t[1],10)||0);}
 function fmtTime(d){var h=d.getHours(),m=d.getMinutes(),ap=h<12?'오전':'오후',hh=h%12;if(hh===0)hh=12;return ap+' '+hh+':'+('0'+m).slice(-2);}
 function dateText(){
@@ -904,45 +948,87 @@ function dateText(){
   return (d.getMonth()+1)+'월 '+d.getDate()+'일 '+w+'요일';
 }
 function renderRoute(){
+  var course=(state.myCourse||[]).filter(function(k){return COURSE_META[k];});
   var box=document.getElementById('route-timeline');
   if(box){
-    var cur=parseDepart(),html='';
-    ROUTE.forEach(function(it){
-      if(it.type==='drive'){html+='<div class="drive">🚐 '+it.label+'</div>';cur=new Date(cur.getTime()+it.min*60000);return;}
-      if(it.type==='lunch'){html+='<div class="lunch">🍚 '+it.label+'</div>';cur=new Date(cur.getTime()+it.min*60000);return;}
-      var arrive=new Date(cur.getTime()),chip;
-      if(it.label==='출발')chip=fmtTime(arrive)+' 출발';
-      else if(it.end)chip=fmtTime(arrive)+' 무렵 도착';
-      else chip=fmtTime(arrive)+' 도착'+(it.stay?' · '+it.stay+'분':'');
-      cur=new Date(cur.getTime()+(it.stay||0)*60000);
-      var act='';
-      if(it.tel)act+='<a class="act" href="tel:'+it.tel+'">전화 '+it.telLabel+'</a>';
-      if(it.map)act+='<a class="act nav" target="_blank" rel="noopener" href="https://map.kakao.com/link/to/'+it.map+','+it.lat+','+it.lng+'">길찾기</a>';
-      var line=it.end?'':'<div class="line"></div>';
-      html+='<div class="stop'+(it.end?' end':'')+'"><div class="rail"><div class="dot">'+it.dot+'</div>'+line+'</div>'
-        +'<div class="body"><span class="time-chip">'+chip+'</span>'
-        +'<div class="stop-card"><b>'+it.name+'</b><div class="note">'+it.note+'</div>'
-        +(act?'<div class="stop-actions">'+act+'</div>':'')+'</div></div></div>';
-    });
-    box.innerHTML=html;
+    if(!course.length){
+      box.innerHTML='<p class="bingo-hint">아직 순례 일정이 없어요.<br>‘순례단·알림’에서 단장이 정한 일정을 받거나, ‘나만의 순례 일정 짜기’에서 성지를 골라 담아요.</p>';
+    }else{
+      var seq=['start'].concat(course).concat(['end']);
+      var cur=parseDepart(),num=0,html='<p class="bingo-hint">⏱️ 도착 시각은 예상이에요. 그날 교통과 머무는 시간에 따라 달라지니, 길에서는 카카오내비·티맵으로 확인하세요.</p>';
+      for(var i=0;i<seq.length;i++){
+        var k=seq[i];
+        if(i>0){
+          var dm=driveMin(seq[i-1],k);
+          html+='<div class="drive">🚐 약 '+dm+'분 (예상 이동)</div>';
+          cur=new Date(cur.getTime()+dm*60000);
+        }
+        var dot,name,note,tel,telLabel,search,stay=0,end=false,chip;
+        if(k==='start'){
+          var g=startInfo();dot='출';name=g.name;note=seasonTip();tel=g.tel;telLabel=g.telLabel;search=g.search;
+          chip=fmtTime(cur)+' 출발';
+        }else if(k==='end'){
+          dot='✓';end=true;name=startInfo().label+' 도착 · 순례 마침';note='모두 안전하게 다녀오길! 실제 시간은 카카오내비·티맵으로 확인하세요.';
+          chip='약 '+fmtTime(cur)+' 무렵 도착';
+        }else{
+          num++;var m=COURSE_META[k],gg=SITE_GEO[k]||{};dot=String(num);name=m.title;note=gg.note||m.desc;tel=gg.tel;telLabel=gg.telLabel;search=m.search;stay=gg.stay||40;
+          chip='약 '+fmtTime(cur)+' 도착'+(stay?' · '+stay+'분':'');
+        }
+        var act='';
+        if(tel)act+='<a class="act" href="tel:'+tel+'">전화 '+telLabel+'</a>';
+        if(search)act+='<a class="act nav" target="_blank" rel="noopener" href="https://map.kakao.com/link/search/'+encodeURIComponent(search)+'">길찾기</a>';
+        var line=end?'':'<div class="line"></div>';
+        html+='<div class="stop'+(end?' end':'')+'"><div class="rail"><div class="dot">'+dot+'</div>'+line+'</div>'
+          +'<div class="body"><span class="time-chip">'+chip+'</span>'
+          +'<div class="stop-card"><b>'+name+'</b><div class="note">'+note+'</div>'
+          +(act?'<div class="stop-actions">'+act+'</div>':'')+'</div></div></div>';
+        if(stay)cur=new Date(cur.getTime()+stay*60000);
+      }
+      box.innerHTML=html;
+    }
   }
   var dt=dateText(),tm=fmtTime(parseDepart());
-  var rd=document.getElementById('routeDay');if(rd)rd.textContent=(dt?dt+' · ':'')+'남원 출발 → 서부 성지 한 바퀴 (운전 약 3시간)';
+  var lbl=startInfo().label;
+  var rd=document.getElementById('routeDay');if(rd)rd.textContent=(dt?dt+' · ':'')+lbl+' 출발 → 성지 '+course.length+'곳 → '+lbl;
   var tw=document.getElementById('tripWhen');if(tw)tw.textContent=(dt?dt+' · ':'날짜 미정 · ')+tm+' 출발';
-  var rs=document.getElementById('routeSub');if(rs)rs.textContent='남원 출발 · 순례 순서와 시간';
+  var rs=document.getElementById('routeSub');if(rs)rs.textContent=lbl+' 출발 · 순례 순서와 시간';
 }
 function editTrip(){
   var f=document.getElementById('tripForm');
   var open=getComputedStyle(f).display==='none';
-  if(open){document.getElementById('tripDate').value=state.tripDate||'';document.getElementById('tripTime').value=state.departTime||'09:10';}
+  if(open){
+    document.getElementById('tripDate').value=state.tripDate||'';
+    document.getElementById('tripTime').value=state.departTime||'09:10';
+    document.getElementById('startNameInput').value=state.startName||'';
+    document.getElementById('startLabelInput').value=state.startLabel||'';
+    document.getElementById('startSearchInput').value=state.startSearch||'';
+    document.getElementById('startLatInput').value=(state.startLat!=null)?state.startLat:'';
+    document.getElementById('startLngInput').value=(state.startLng!=null)?state.startLng:'';
+  }
   f.style.display=open?'flex':'none';
 }
 function saveTrip(){
   var d=document.getElementById('tripDate').value,t=document.getElementById('tripTime').value;
   if(d)state.tripDate=d;
   if(t)state.departTime=t;
+  state.startName=(document.getElementById('startNameInput').value||'').trim();
+  state.startLabel=(document.getElementById('startLabelInput').value||'').trim();
+  state.startSearch=(document.getElementById('startSearchInput').value||'').trim();
+  var la=parseFloat(document.getElementById('startLatInput').value),lo=parseFloat(document.getElementById('startLngInput').value);
+  state.startLat=isNaN(la)?null:la;
+  state.startLng=isNaN(lo)?null:lo;
   save();
   document.getElementById('tripForm').style.display='none';
+  renderRoute();
+}
+function resetStart(){
+  state.startName='';state.startLabel='';state.startSearch='';state.startLat=null;state.startLng=null;
+  save();
+  document.getElementById('startNameInput').value='';
+  document.getElementById('startLabelInput').value='';
+  document.getElementById('startSearchInput').value='';
+  document.getElementById('startLatInput').value='';
+  document.getElementById('startLngInput').value='';
   renderRoute();
 }
 
@@ -1386,6 +1472,7 @@ function layoutHome(){
   var ids={'sec-startpray':p,'sec-stamp':p,'sec-other':p,'sec-bonus':p,'sec-all':!p};
   for(var id in ids){var el=document.getElementById(id);if(el)el.style.display=ids[id]?'block':'none';}
   if(p){renderSites();renderMoreList();}else{renderAllSites();}
+  var rs=document.getElementById('routeSub');if(rs)rs.textContent=startInfo().label+' 출발 · 순례 순서와 시간';
 }
 function openMore(key){
   currentMore=key;var s=moreFind(key);
@@ -1486,6 +1573,18 @@ function adoptCourse(data){
   state.planned=true;
   if(data.tripDate)state.tripDate=data.tripDate;
   if(data.departTime)state.departTime=data.departTime;
+  /* 응답에 start 항목이 있을 때만 단장 출발지로 맞춤(옛 서버 응답이면 기존 값 유지) */
+  if(Object.prototype.hasOwnProperty.call(data,'start')){
+    if(data.start&&data.start.name){
+      state.startName=data.start.name||'';
+      state.startLabel=data.start.label||'';
+      state.startSearch=data.start.search||'';
+      state.startLat=(data.start.lat!=null)?data.start.lat:null;
+      state.startLng=(data.start.lng!=null)?data.start.lng:null;
+    }else{
+      state.startName='';state.startLabel='';state.startSearch='';state.startLat=null;state.startLng=null;
+    }
+  }
   clearPastTripDate();
   save();
   return true;
@@ -1612,7 +1711,8 @@ function leaderPanel(info){
 }
 function doShareCourse(){
   if(!state.myCourse||!state.myCourse.length){alert('먼저 ‘나만의 순례 일정 짜기’에서 일정을 정해 주세요.');return;}
-  api('/api/set-course',{id:state.troopId,pw:leaderPw,course:state.myCourse,tripDate:state.tripDate,departTime:state.departTime}).then(function(r){
+  var st=(state.startName&&state.startName.trim())?{name:state.startName.trim(),label:(state.startLabel||'').trim(),search:(state.startSearch||'').trim(),lat:(state.startLat!=null)?state.startLat:null,lng:(state.startLng!=null)?state.startLng:null}:null;
+  api('/api/set-course',{id:state.troopId,pw:leaderPw,course:state.myCourse,tripDate:state.tripDate,departTime:state.departTime,start:st}).then(function(r){
     var m=document.getElementById('tMsg');
     if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'공유 실패';return;}
     m.className='feedback good';m.textContent=(r.j.notified?'순례 일정을 공유하고 단원에게 알림을 보냈어요! ✓':'순례 일정을 공유했어요! (구독한 단원이 아직 없어요) ✓');
@@ -1771,7 +1871,7 @@ function confetti(){
 }
 function resetAll(){
   if(confirm('정말 처음부터 다시 시작할까요? 모든 도장이 사라져요.')){
-    state={name:'',baptismal:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false,jigsaw:false,spot:false,color:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'',departTime:'09:10',myCourse:[],planned:false,troopId:'',troopName:''};
+    state={name:'',baptismal:'',done:{yongsu_ox:false,yongsu_bingo:false,boat:false,daejeong:false,hallim_gift:false,hallim_quote:false,hallim_ox:false,daejeong_ox:false,hallim_journey:false,memory:false,match:false,jigsaw:false,spot:false,color:false},missions:[false,false,false],order:['yongsu','daejeong','hallim'],tripDate:'',departTime:'09:10',startName:'',startLabel:'',startSearch:'',startLat:null,startLng:null,myCourse:[],planned:false,troopId:'',troopName:''};
     bingoFound={};save();
     document.getElementById('nameInput').value='';
     document.querySelectorAll('.mission').forEach(function(m){m.classList.remove('on');});

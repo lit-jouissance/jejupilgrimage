@@ -11,6 +11,7 @@ export default async function handler(req, res) {
     return res.json({
       notifyStart: x.notifyStart, notifyEnd: x.notifyEnd,
       course: x.course || null, tripDate: x.tripDate || null, departTime: x.departTime || null,
+      start: x.start || null,
     });
   }
 

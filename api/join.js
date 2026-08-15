@@ -19,6 +19,7 @@ export default async function handler(req, res) {
       course: x.course || null,
       tripDate: x.tripDate || null,
       departTime: x.departTime || null,
+      start: x.start || null,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
