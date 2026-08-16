@@ -415,7 +415,13 @@
     <div class="splash-mark">✝️</div>
     <div class="splash-quote" id="splashQuote">…</div>
     <div class="splash-by" id="splashBy"></div>
+    <div id="roleGuide" style="display:none;text-align:left;max-width:420px;margin:6px auto 0;background:rgba(255,255,255,.14);border-radius:16px;padding:14px 16px;line-height:1.6;font-size:14px">
+      <b style="display:block;margin-bottom:6px">처음이신가요? 🌱</b>
+      <div style="margin-bottom:8px">🧒 <b>아이(단원)</b>라면 — 이름·세례명을 넣고 성지를 순례하며 <b>도장과 미션</b>을 모아요. 단장 선생님이 순례단을 만들어 두면 <b>‘순례단·알림’</b>에서 들어가 <b>일정과 알림</b>을 받을 수 있어요.</div>
+      <div>⛪ <b>단장(선생님)</b>이라면 — <b>‘순례단·알림’ → 순례단 만들기</b>로 순례단을 개설하고, <b>단장 로그인</b> 후 순례 일정을 정해 <b>공유·알림</b>을 보낼 수 있어요.</div>
+    </div>
     <button class="splash-btn" onclick="enterApp()">순례 시작하기 →</button>
+    <a href="#" id="roleGuideToggle" onclick="toggleRoleGuide();return false;" style="display:inline-block;margin-top:2px;color:rgba(255,255,255,.85);text-decoration:underline;font-size:13px">단장·아이 역할이 궁금해요</a>
   </div>
 </div>
 
@@ -433,6 +439,23 @@
         <button class="name-ok" onclick="applyName()">확인</button>
       </div>
       <div class="name-hi" id="nameHi"></div>
+    </div>
+
+    <!-- 홈 화면 설치 안내 (미설치 기기에만 표시) -->
+    <div id="installTip" style="display:none;background:#eef4f0;border:1px solid #d5e4da;border-radius:16px;padding:14px 16px;margin-bottom:14px;line-height:1.6;position:relative">
+      <button onclick="dismissInstall()" aria-label="닫기" style="position:absolute;top:8px;right:10px;border:none;background:none;font-size:18px;color:#8aa;cursor:pointer">✕</button>
+      <b style="display:block;margin-bottom:6px">📲 홈 화면에 추가하면 더 편해요</b>
+      <div id="installIOS" style="display:none">
+        아이폰: 사파리 아래쪽 <b>공유 버튼</b>
+        <svg width="16" height="18" viewBox="0 0 16 18" style="vertical-align:-3px;margin:0 1px" aria-hidden="true">
+          <path d="M8 1.5v9M8 1.5L5 4.5M8 1.5l3 3" fill="none" stroke="#2f7d4f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3.5 7.5H2.5v8h11v-8h-1" fill="none" stroke="#2f7d4f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        을 누르고 → <b>‘홈 화면에 추가’</b>를 선택하세요. (알림은 홈 화면 추가 후에만 와요.)
+      </div>
+      <div id="installAndroid" style="display:none">
+        안드로이드: 크롬 오른쪽 위 <b>⋮ 메뉴</b> → <b>‘홈 화면에 추가/앱 설치’</b>를 선택하세요.
+      </div>
     </div>
 
     <button class="route-cta" style="background:linear-gradient(120deg,#2f7d4f,#3f9c63)" onclick="go('course')">
@@ -517,6 +540,38 @@
 
     <button class="reset" onclick="openTeacher()">📋 순례 기록 보기 (admin용)</button>
     <button class="reset" onclick="askReset()">처음부터 다시 시작 (admin용)</button>
+    <p class="bingo-hint" style="text-align:center;margin-top:14px">
+      <a href="#" onclick="go('privacy');return false;" style="color:#7a8590;text-decoration:underline">🔒 개인정보 안내</a>
+    </p>
+  </section>
+
+  <!-- ===================== 개인정보 안내 ===================== -->
+  <section id="privacy" class="screen">
+    <div class="topbar"><button class="back" onclick="go('home')">←</button><h2>🔒 개인정보 안내</h2></div>
+    <div class="intro-card"><span class="em">🔒</span>
+      이 앱은 순례를 돕기 위해 꼭 필요한 정보만 다뤄요. 무엇이 저장되고 어떻게 지우는지 쉽게 알려드릴게요.
+    </div>
+    <div class="stop-card" style="margin-bottom:12px">
+      <b>무엇이 저장되나요?</b>
+      <div class="note">이름·세례명, 순례 도장과 미션 진행 상황, 순례단 이름·코드가 저장돼요. 알림을 켜면, 알림을 보내기 위한 기기 표시(토큰)도 저장돼요.</div>
+    </div>
+    <div class="stop-card" style="margin-bottom:12px">
+      <b>어디에 저장되나요?</b>
+      <div class="note">대부분 이 기기(브라우저) 안에만 저장돼요. ‘순례단·알림’을 쓰면 순례단 이름·코드·일정과 알림 표시가 순례단 서버(Firebase)에 저장돼요.</div>
+    </div>
+    <div class="stop-card" style="margin-bottom:12px">
+      <b>누가 볼 수 있나요?</b>
+      <div class="note">순례 기록(도장·미션)은 순례단 단장이 admin으로 볼 수 있어요. 그 밖의 사람은 볼 수 없어요.</div>
+    </div>
+    <div class="stop-card" style="margin-bottom:12px">
+      <b>어떻게 지우나요?</b>
+      <div class="note">홈의 ‘처음부터 다시 시작(admin용)’을 누르면 이 기기의 기록이 지워져요. 순례단을 나가거나 단장이 순례단을 삭제하면 서버에 있던 정보도 지워져요.</div>
+    </div>
+    <div class="stop-card" style="margin-bottom:12px">
+      <b>안전하게 쓰는 팁</b>
+      <div class="note">이름 대신 별명을 써도 괜찮아요. 꼭 필요한 정보만 넣고, 함께 쓰는 기기라면 순례가 끝난 뒤 ‘처음부터 다시 시작’으로 지워 주세요.</div>
+    </div>
+    <p class="bingo-hint">이 안내는 어려운 법률 문서가 아니라, 쉽게 이해하도록 정리한 설명이에요. 궁금한 점은 순례단 단장(선생님)에게 물어보세요.</p>
   </section>
 
   <!-- ===================== 다른 성지 상세 ===================== -->
@@ -932,6 +987,8 @@ var SEASON_TIPS=[
   {months:[9,10,11], text:'선선한 날이에요. 낮엔 따뜻해도 오후·저녁엔 쌀쌀할 수 있으니 겉옷을 챙겨요.'}
 ];
 var SEASON_TIP_DEFAULT='물·모자·여분 간식을 챙기고, 걷기 편한 신발을 신어요.';
+/* 콘텐츠 최신성 안내 — 자유롭게 고치세요. 시간·전화가 나오는 화면에 함께 보여줍니다 */
+var FRESH_NOTE='미사 시간·개방 시간·전화번호는 바뀔 수 있어요. 방문 전에 성지에 전화로 꼭 확인하세요.';
 function seasonTip(){
   if(!state.tripDate)return SEASON_TIP_DEFAULT;
   var mo=parseInt(state.tripDate.split('-')[1],10);
@@ -984,6 +1041,7 @@ function renderRoute(){
           +(act?'<div class="stop-actions">'+act+'</div>':'')+'</div></div></div>';
         if(stay)cur=new Date(cur.getTime()+stay*60000);
       }
+      html+='<p class="bingo-hint" style="margin-top:12px">ℹ️ '+FRESH_NOTE+'</p>';
       box.innerHTML=html;
     }
   }
@@ -1481,7 +1539,8 @@ function openMore(key){
   var done=state.done['more_'+key];
   var body='<div class="intro-card"><span class="em">'+s.emoji+'</span>'+s.story+'</div>'
     +'<div class="stop-card" style="margin-bottom:14px"><div class="note">📍 '+s.info+'</div>'
-    +'<div class="stop-actions"><a class="act nav" target="_blank" rel="noopener" href="'+kakao+'">길찾기</a></div></div>';
+    +'<div class="stop-actions"><a class="act nav" target="_blank" rel="noopener" href="'+kakao+'">길찾기</a></div></div>'
+    +'<p class="bingo-hint">ℹ️ '+FRESH_NOTE+'</p>';
   if(s.prayerText){
     body+='<div class="pray-box"><h4>🙏 '+s.prayerTitle+'</h4>'+s.prayerText+'<span class="amen">아멘.</span></div>';
   }
@@ -1551,9 +1610,20 @@ function confirmPlan(){state.planned=true;save();go('home');}
 
 /* ---------------- 순례단 · 알림 (FCM) ---------------- */
 var leaderPw='';
+function isOnline(){return (typeof navigator==='undefined')||navigator.onLine!==false;}
 function api(path,data,method){
+  if(!isOnline()){return Promise.resolve({ok:false,offline:true,j:{}});}
   return fetch(path,{method:method||'POST',headers:{'Content-Type':'application/json'},
-    body:data?JSON.stringify(data):undefined}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});});
+    body:data?JSON.stringify(data):undefined})
+    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};},function(){return {ok:r.ok,j:{}};});})
+    .catch(function(){return {ok:false,neterr:true,j:{}};});
+}
+/* 서버 응답의 실패 원인을 사람이 읽을 수 있는 한 줄로 */
+function apiErrMsg(r){
+  if(r&&r.offline)return '지금 인터넷이 연결되어 있지 않아요. 연결 후 다시 해 주세요.';
+  if(r&&r.neterr)return '서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요.';
+  if(r&&r.j&&r.j.error)return r.j.error;
+  return '요청을 처리하지 못했어요. 잠시 뒤 다시 시도해 주세요.';
 }
 function renderTroop(){
   var box=document.getElementById('troop-body');
@@ -1591,10 +1661,11 @@ function adoptCourse(data){
 }
 function pullTroopCourse(){
   if(!state.troopId){alert('먼저 순례단에 들어가 주세요.');return;}
-  fetch('/api/config?id='+encodeURIComponent(state.troopId)).then(function(r){return r.json();}).then(function(j){
-    if(adoptCourse(j)){alert('단장이 정한 순례 일정을 받았어요! 홈에서 확인하세요.');go('home');}
+  api('/api/config?id='+encodeURIComponent(state.troopId),null,'GET').then(function(r){
+    if(!r.ok){alert(apiErrMsg(r));return;}
+    if(adoptCourse(r.j)){alert('단장이 정한 순례 일정을 받았어요! 홈에서 확인하세요.');go('home');}
     else{alert('아직 단장이 공유한 일정이 없어요.');}
-  }).catch(function(){alert('일정을 불러오지 못했어요.');});
+  });
 }
 function troopCreate(){
   var box=document.getElementById('troop-body');
@@ -1607,19 +1678,20 @@ function doCreate(){
   if(!name)return;
   document.getElementById('tMsg').textContent='개설 중...';
   api('/api/create',{name:name}).then(function(r){
-    if(!r.ok){document.getElementById('tMsg').textContent=r.j.error||'실패했어요';return;}
+    if(!r.ok){document.getElementById('tMsg').textContent=apiErrMsg(r);return;}
     state.troopId=r.j.id;state.troopName=r.j.fullName;save();
     var box=document.getElementById('troop-body');
     box.innerHTML='<div class="stop-card"><b>✅ '+r.j.fullName+' 개설 완료</b>'
       +'<div class="note">단원들에게 이 이름(<b>'+r.j.fullName+'</b>)을 알려주면 스스로 들어올 수 있어요.<br><br>'
       +'단장 비밀번호는 처음에 <b>0000</b>이에요. ‘단장 로그인’ 후 꼭 바꿔주세요.</div></div>'
       +'<button class="big-next gold" onclick="renderTroop()">확인</button>';
-  }).catch(function(){document.getElementById('tMsg').textContent='연결에 실패했어요';});
+  });
 }
 function troopJoin(){
   var box=document.getElementById('troop-body');
   box.innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🙋 순례단 들어가기</h2></div><p class="bingo-hint">목록을 불러오는 중...</p>';
   api('/api/list',null,'GET').then(function(r){
+    if(!r.ok){document.getElementById('troop-body').innerHTML='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🙋 순례단 들어가기</h2></div><p class="bingo-hint">'+apiErrMsg(r)+'</p>';return;}
     var items=(r.j&&r.j.items)||[];
     var html='<div class="topbar"><button class="back" onclick="renderTroop()">←</button><h2>🙋 순례단 들어가기</h2></div>';
     if(!items.length)html+='<p class="bingo-hint">아직 개설된 순례단이 없어요.</p>';
@@ -1629,7 +1701,7 @@ function troopJoin(){
     });
     html+='<div class="feedback" id="tMsg"></div>';
     document.getElementById('troop-body').innerHTML=html;
-  }).catch(function(){document.getElementById('troop-body').innerHTML='<p class="bingo-hint">목록을 불러오지 못했어요.</p>';});
+  });
 }
 function doJoin(id,fullName){
   enableAlerts(id).then(function(res){
@@ -1641,16 +1713,17 @@ function doJoin(id,fullName){
       go('home');return;
     }
     // 알림(푸시)이 안 되면 일정만이라도 받아오기
-    fetch('/api/config?id='+encodeURIComponent(id)).then(function(r){return r.json();}).then(function(j){
-      if(adoptCourse(j)){alert('단장이 정한 순례 일정을 받았어요. 홈에서 확인하세요.');go('home');return;}
-      renderTroop();
-    }).catch(function(){renderTroop();});
-  });
+    api('/api/config?id='+encodeURIComponent(id),null,'GET').then(function(r){
+      if(r.ok&&adoptCourse(r.j)){alert('순례단에 들어왔어요! 단장이 정한 순례 일정도 받았어요.');go('home');return;}
+      alert('순례단에 들어왔어요.'+(pushed?' 알림도 설정됐어요.':''));renderTroop();
+    });
+  }).catch(function(){alert('순례단 참여 중 문제가 있었어요. 잠시 뒤 다시 시도해 주세요.');});
 }
 function enableAlerts(id){
   if(!('serviceWorker' in navigator)||typeof firebase==='undefined'){return Promise.resolve(null);}
   if(!initCloud()){return Promise.resolve(null);}
-  return navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function(reg){
+  var swReady=(typeof SW_REG!=='undefined'&&SW_REG)?Promise.resolve(SW_REG):navigator.serviceWorker.register('/sw.js');
+  return swReady.then(function(reg){
     return Notification.requestPermission().then(function(p){
       if(p!=='granted'){return null;}
       return firebase.messaging().getToken({vapidKey:VAPID_KEY,serviceWorkerRegistration:reg}).then(function(token){
@@ -1714,26 +1787,26 @@ function doShareCourse(){
   var st=(state.startName&&state.startName.trim())?{name:state.startName.trim(),label:(state.startLabel||'').trim(),search:(state.startSearch||'').trim(),lat:(state.startLat!=null)?state.startLat:null,lng:(state.startLng!=null)?state.startLng:null}:null;
   api('/api/set-course',{id:state.troopId,pw:leaderPw,course:state.myCourse,tripDate:state.tripDate,departTime:state.departTime,start:st}).then(function(r){
     var m=document.getElementById('tMsg');
-    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'공유 실패';return;}
+    if(!r.ok){m.className='feedback soft';m.textContent=apiErrMsg(r);return;}
     m.className='feedback good';m.textContent=(r.j.notified?'순례 일정을 공유하고 단원에게 알림을 보냈어요! ✓':'순례 일정을 공유했어요! (구독한 단원이 아직 없어요) ✓');
-  }).catch(function(){var m=document.getElementById('tMsg');m.className='feedback soft';m.textContent='연결 실패';});
+  });
 }
 function doDeleteTroop(){
   if(!confirm('정말 이 순례단을 삭제할까요?\n삭제하면 단원 알림 구독과 설정이 모두 사라져요.'))return;
   api('/api/delete',{id:state.troopId,pw:leaderPw}).then(function(r){
     var m=document.getElementById('tMsg');
-    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'삭제 실패';return;}
+    if(!r.ok){m.className='feedback soft';m.textContent=apiErrMsg(r);return;}
     if(state.troopId===state.troopId){state.troopId='';state.troopName='';save();}
     leaderPw='';
     alert('순례단을 삭제했어요.');
     renderTroop();
-  }).catch(function(){var m=document.getElementById('tMsg');m.className='feedback soft';m.textContent='연결 실패';});
+  });
 }
 function doChangePw(){
   var np=document.getElementById('tNewPw').value;
   api('/api/change-pw',{id:state.troopId,pw:leaderPw,newPw:np}).then(function(r){
     var m=document.getElementById('tMsg');
-    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'실패';return;}
+    if(!r.ok){m.className='feedback soft';m.textContent=apiErrMsg(r);return;}
     leaderPw=np;m.className='feedback good';m.textContent='비밀번호를 바꿨어요 ✓';
   });
 }
@@ -1742,7 +1815,7 @@ function doSaveConfig(){
   var start=s?s+'T00:00:00+09:00':null,end=e?e+'T23:59:59+09:00':null;
   api('/api/config',{id:state.troopId,pw:leaderPw,start:start,end:end}).then(function(r){
     var m=document.getElementById('tMsg');
-    if(!r.ok){m.className='feedback soft';m.textContent=r.j.error||'실패';return;}
+    if(!r.ok){m.className='feedback soft';m.textContent=apiErrMsg(r);return;}
     m.className='feedback good';m.textContent='기간을 저장했어요 ✓';
   });
 }
@@ -1775,6 +1848,7 @@ function renderMyCourse(){
       +'<button class="act" style="border:none;background:#eef2f7" onclick="'+(m.type==='more'?'openMore(\''+k+'\')':'go(\''+k+'\')')+'">자세히 보기</button>'
       +'</div></div></div></div>';
   });
+  html+='<p class="bingo-hint" style="margin-top:10px">ℹ️ '+FRESH_NOTE+'</p>';
   box.innerHTML=html;
 }
 
@@ -1959,11 +2033,21 @@ var SAINT_QUOTES=[
   {t:'믿는 이는 이 세상을 지나가는 순례자입니다.',by:'성 요한 바오로 2세'},
   {t:'용기를 내어라.',by:'성 김대건 안드레아'}
 ];
+function toggleRoleGuide(){
+  var g=document.getElementById('roleGuide'),t=document.getElementById('roleGuideToggle');
+  if(!g)return;
+  var open=g.style.display!=='none';
+  g.style.display=open?'none':'block';
+  if(t)t.style.display=open?'inline-block':'none';
+}
 function showSplash(){
   var q=SAINT_QUOTES[Math.floor(Math.random()*SAINT_QUOTES.length)];
   var qt=document.getElementById('splashQuote'),by=document.getElementById('splashBy');
   if(qt)qt.textContent='“'+q.t+'”';
   if(by)by.textContent='— '+q.by;
+  // 처음 방문(이름·순례단·도장 기록이 없을 때)엔 역할 안내를 자동으로 펼쳐요
+  var fresh=!state.name&&!state.troopId&&!(state.done&&Object.keys(state.done).length);
+  if(fresh)toggleRoleGuide();
 }
 function enterApp(){var s=document.getElementById('splash');if(s)s.style.display='none';}
 showSplash();
@@ -1982,6 +2066,28 @@ renderMoreList();
 layoutHome();
 renderRoute();
 refresh();
+
+/* 오프라인 대응: 앱을 열 때마다 서비스워커를 등록해 둡니다(캐싱+알림 겸용) */
+var SW_REG=null;
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').then(function(reg){SW_REG=reg;}).catch(function(){});
+}
+
+/* 홈 화면 설치 안내: 이미 설치(standalone)했거나 닫은 적 있으면 표시 안 함 */
+function dismissInstall(){var t=document.getElementById('installTip');if(t)t.style.display='none';try{localStorage.setItem('installTipHidden','1');}catch(e){}}
+(function(){
+  var tip=document.getElementById('installTip');if(!tip)return;
+  var standalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||(navigator.standalone===true);
+  var hidden=false;try{hidden=localStorage.getItem('installTipHidden')==='1';}catch(e){}
+  if(standalone||hidden)return;
+  var ua=navigator.userAgent||'';
+  var isIOS=/iP(hone|ad|od)/.test(ua)||(/Macintosh/.test(ua)&&'ontouchend' in document);
+  var isAndroid=/Android/.test(ua);
+  if(isIOS){document.getElementById('installIOS').style.display='block';}
+  else if(isAndroid){document.getElementById('installAndroid').style.display='block';}
+  else{document.getElementById('installAndroid').style.display='block';}
+  tip.style.display='block';
+})();
 </script>
 </body>
 </html>
